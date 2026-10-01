@@ -1,0 +1,290 @@
+digraph DGA_Architecture {
+    graph [
+        rankdir=TB,
+        splines=spline,
+        nodesep=0.50,
+        ranksep=0.62,
+        bgcolor="#FFFFFF",
+        fontname="Liberation Sans",
+        fontsize=18,
+        compound=true,
+        pad="0.2,0.2"
+    ];
+
+    node [
+        fontname="Liberation Sans",
+        fontsize=15,
+        shape=rect,
+        style="rounded,filled",
+        penwidth=2.5
+    ];
+
+    edge [
+        fontname="Liberation Sans",
+        fontsize=14.5,
+        penwidth=2.6,
+        color="#334155"
+    ];
+
+    // =========================================================================
+    // LAYER 1: CLIENT PRESENTATION TIER
+    // =========================================================================
+    CLIENT [
+        label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+            <tr><td><font point-size="22"><b>🖥️ Presentation Layer: React 19 Single Page Application</b></font></td></tr>
+            <tr><td><font point-size="15" color="#1E40AF"><b>Frontend Security Operations Center (SOC) Workbench · Port 3100 (Vite 6 / Tailwind CSS v4)</b></font></td></tr>
+            <tr><td bgcolor="#93C5FD" height="3"></td></tr>
+            <tr><td align="left"><font point-size="14.5" color="#1E293B">• <b>Single Domain Workbench:</b> Real-time investigation, radar feature breakdown, probability badge &amp; risk tiering</font></td></tr>
+            <tr><td align="left"><font point-size="14.5" color="#1E293B">• <b>Bulk Telemetry Audit:</b> Concurrent enterprise DNS log audit with full RFC 4180 SIEM-grade CSV report export</font></td></tr>
+            <tr><td align="left"><font point-size="14.5" color="#1E293B">• <b>Model Drift Dashboard:</b> Live Kolmogorov-Smirnov distribution tracking with automated retraining indicators</font></td></tr>
+        </table>>,
+        fillcolor="#EFF6FF",
+        color="#2563EB",
+        fontcolor="#1E3A8A",
+        width=10.2
+    ];
+
+    // =========================================================================
+    // LAYER 2: INGRESS GATEWAY & ULTRA-FAST CACHE (SIDE-BY-SIDE)
+    // =========================================================================
+    subgraph cluster_ingress {
+        label=<<table border="0" cellborder="0" cellpadding="5">
+            <tr><td><font point-size="18.5" color="#0F766E"><b>API INGRESS GATEWAY &amp; SUB-MILLISECOND CACHING TIER (FASTAPI · PORT 9000)</b></font></td></tr>
+        </table>>;
+        style="rounded,filled";
+        fillcolor="#F0FDFA";
+        color="#2DD4BF";
+        penwidth=2.2;
+
+        { rank=same; GW; CACHE; }
+
+        GW [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18.5"><b>🛡️ FastAPI Ingress Gateway</b></font></td></tr>
+                <tr><td><font point-size="14" color="#0F766E"><b>Asynchronous Uvicorn Server Runtime</b></font></td></tr>
+                <tr><td bgcolor="#5EEAD4" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• SlowAPI rate limiter (120 req/min/IP quota)</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• RFC 1034 / 1035 hostname syntax validation</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• RFC 5890 IDN Punycode decoding (xn--)</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Threadpool dispatch for zero event-loop blocking</font></td></tr>
+            </table>>,
+            fillcolor="#FFFFFF",
+            color="#0D9488",
+            fontcolor="#134E4A",
+            width=4.9
+        ];
+
+        CACHE [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18.5"><b>⚡ Prediction Cache (LRU)</b></font></td></tr>
+                <tr><td><font point-size="14" color="#B45309"><b>Thread-Safe In-Memory Bounded Store</b></font></td></tr>
+                <tr><td bgcolor="#FCD34D" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• 10,000 domain bounded capacity (OrderedDict)</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Cache Hit Response Latency: <b>&lt; 100 µs</b></font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Thread-safe mutex lock with deep-copy isolation</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Short-circuits feature extraction &amp; ML inference</font></td></tr>
+            </table>>,
+            fillcolor="#FEF3C7",
+            color="#D97706",
+            fontcolor="#78350F",
+            width=4.9
+        ];
+    }
+
+    // =========================================================================
+    // LAYER 3: ZERO-FETCH FEATURES & DRIFT MONITOR (SIDE-BY-SIDE)
+    // =========================================================================
+    subgraph cluster_features {
+        label=<<table border="0" cellborder="0" cellpadding="5">
+            <tr><td><font point-size="18.5" color="#334155"><b>ZERO-FETCH FEATURE EXTRACTION &amp; CONTINUOUS DRIFT QUEUE</b></font></td></tr>
+        </table>>;
+        style="rounded,filled";
+        fillcolor="#F8FAFC";
+        color="#94A3B8";
+        penwidth=2.2;
+
+        { rank=same; FEAT; DRIFT; }
+
+        FEAT [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18.5"><b>⚙️ 13-D Lexical Feature Extractor</b></font></td></tr>
+                <tr><td><font point-size="14" color="#475569"><b>Pure In-Memory Evaluation · Execution Latency &lt; 0.15 ms</b></font></td></tr>
+                <tr><td bgcolor="#CBD5E1" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• <b>Statistical Metrics:</b> Shannon entropy, hex ratio, digit ratio, vowel ratio, unique chars</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• <b>N-Gram Language Model:</b> Laplace-smoothed character bigram log-likelihood</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• <b>Structural Linguistics:</b> WordNinja sub-word segmentation, valid word ratio, consonant runs</font></td></tr>
+            </table>>,
+            fillcolor="#FFFFFF",
+            color="#475569",
+            fontcolor="#0F172A",
+            width=6.0
+        ];
+
+        DRIFT [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18.5"><b>📊 Statistical Drift Monitor</b></font></td></tr>
+                <tr><td><font point-size="14" color="#C2410C"><b>Two-Sample Kolmogorov-Smirnov Test</b></font></td></tr>
+                <tr><td bgcolor="#FED7AA" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• 2,000-sample sliding deque window</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Real-time vs baseline distribution check</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Triggers alert when p &lt; 0.05 and KS &gt; 0.15</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Detects adversarial concept drift</font></td></tr>
+            </table>>,
+            fillcolor="#FFF7ED",
+            color="#EA580C",
+            fontcolor="#7C2D12",
+            width=3.8
+        ];
+    }
+
+    // =========================================================================
+    // LAYER 4: TWO-STAGE CASCADED ML ENGINE
+    // =========================================================================
+    subgraph cluster_ml {
+        label=<<table border="0" cellborder="0" cellpadding="5">
+            <tr><td><font point-size="18.5" color="#065F46"><b>TWO-STAGE CASCADED MACHINE LEARNING DETECTION &amp; ATTRIBUTION ENGINE</b></font></td></tr>
+        </table>>;
+        style="rounded,filled";
+        fillcolor="#ECFDF5";
+        color="#6EE7B7";
+        penwidth=2.2;
+
+        S1 [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="19"><b>🎯 Stage 1: Calibrated XGBoost Binary Classifier</b></font></td></tr>
+                <tr><td><font point-size="14.5" color="#065F46"><b>Primary Operational Boundary · Validation F1: 87.5% · ROC-AUC: 0.945 · FPR ≤ 0.5%</b></font></td></tr>
+                <tr><td bgcolor="#6EE7B7" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Evaluates standard-scaled 13-dimensional feature vector across 300 gradient boosted trees (max depth 8)</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Outputs well-calibrated malicious posterior probability: <b>P(malicious | x)</b> for three-tier risk disposition</font></td></tr>
+            </table>>,
+            fillcolor="#D1FAE5",
+            color="#059669",
+            fontcolor="#064E3B",
+            width=10.2
+        ];
+
+        { rank=same; SAFE; S2; }
+
+        SAFE [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18"><b>🟢 Safe / Allow Risk Tier</b></font></td></tr>
+                <tr><td><font point-size="14" color="#047857"><b>P &lt; 0.35 (Legitimate Domain Traffic)</b></font></td></tr>
+                <tr><td bgcolor="#A7F3D0" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Verified benign domain pattern</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Family label assigned as <i>legitimate</i></font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Zero threat attribution overhead</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Traffic permitted without SOC friction</font></td></tr>
+            </table>>,
+            fillcolor="#FFFFFF",
+            color="#10B981",
+            fontcolor="#065F46",
+            width=4.9
+        ];
+
+        S2 [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18"><b>🕵️ Stage 2: Random Forest Threat Attributor</b></font></td></tr>
+                <tr><td><font point-size="14" color="#4338CA"><b>P ≥ 0.35 (Triggered for Non-Safe Query Traffic)</b></font></td></tr>
+                <tr><td bgcolor="#C7D2FE" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Attributed across <b>25 DGA botnet families</b></font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Emotet, Conficker, Gozi, Mirai, Suppobox, Matsnu...</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Multi-class softmax confidence distribution</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Suspicious (0.35 ≤ P &lt; 0.75) vs Malicious (P ≥ 0.75)</font></td></tr>
+            </table>>,
+            fillcolor="#EEF2FF",
+            color="#6366F1",
+            fontcolor="#312E81",
+            width=4.9
+        ];
+    }
+
+    // =========================================================================
+    // LAYER 5: XAI & DNS TELEMETRY (SIDE-BY-SIDE)
+    // =========================================================================
+    subgraph cluster_enrichment {
+        label=<<table border="0" cellborder="0" cellpadding="5">
+            <tr><td><font point-size="18.5" color="#581C87"><b>THREAT CONTEXT ENRICHMENT: EXPLAINABLE AI (XAI) &amp; LIVE OPERATIONAL DNS</b></font></td></tr>
+        </table>>;
+        style="rounded,filled";
+        fillcolor="#FAF5FF";
+        color="#D8B4FE";
+        penwidth=2.2;
+
+        { rank=same; SHAP; DNS; }
+
+        SHAP [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18"><b>🧮 Native C++ TreeSHAP</b></font></td></tr>
+                <tr><td><font point-size="14" color="#7E22CE"><b>Algorithmic Explainability Engine</b></font></td></tr>
+                <tr><td bgcolor="#E9D5FF" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Ultra-fast sub-0.2 ms booster evaluation</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Computes exact game-theoretic Shapley values</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Extracts <b>Top-3 key risk contributors</b></font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Delivers transparent auditability for SOC analysts</font></td></tr>
+            </table>>,
+            fillcolor="#FFFFFF",
+            color="#9333EA",
+            fontcolor="#581C87",
+            width=4.9
+        ];
+
+        DNS [
+            label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="9">
+                <tr><td><font point-size="18"><b>🌐 Async Live DNS Telemetry</b></font></td></tr>
+                <tr><td><font point-size="14" color="#0369A1"><b>dnspython Resolver (Non-Blocking Opt-In)</b></font></td></tr>
+                <tr><td bgcolor="#BAE6FD" height="2"></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Upstream Cloudflare (1.1.1.1) / Google (8.8.8.8)</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• 2.0 second asynchronous query timeout</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Resolves A, AAAA, NS, and MX live records</font></td></tr>
+                <tr><td align="left"><font point-size="14" color="#1E293B">• Categorizes: <b>Active C2 IP</b> vs <b>Dormant NXDOMAIN</b></font></td></tr>
+            </table>>,
+            fillcolor="#F0F9FF",
+            color="#0284C7",
+            fontcolor="#0C4A6E",
+            width=4.9
+        ];
+    }
+
+    // =========================================================================
+    // LAYER 6: CONSOLIDATED SOC VERDICT
+    // =========================================================================
+    VERDICT [
+        label=<<table border="0" cellborder="0" cellspacing="3" cellpadding="10">
+            <tr><td><font point-size="20.5"><b>📋 Consolidated SOC Threat Intelligence Verdict &amp; Output Dispatch</b></font></td></tr>
+            <tr><td><font point-size="15" color="#BE123C"><b>Unified Multi-Dimensional Decision Engine Output Payload</b></font></td></tr>
+            <tr><td bgcolor="#FECDD3" height="3"></td></tr>
+            <tr><td align="left"><font point-size="14" color="#1E293B">• <b>Operational Risk Classification:</b> Safe / Allow (P &lt; 0.35)  |  Suspicious / Monitor (0.35 ≤ P &lt; 0.75)  |  Malicious / Block (P ≥ 0.75)</font></td></tr>
+            <tr><td align="left"><font point-size="14" color="#1E293B">• <b>Botnet Threat Attribution:</b> Predicted DGA Architecture + Multi-Class Softmax Confidence Score Distribution</font></td></tr>
+            <tr><td align="left"><font point-size="14" color="#1E293B">• <b>Explainability &amp; Telemetry:</b> Top-3 TreeSHAP Feature Drivers + Live DNS Resolution State (Active C2 vs Sinkhole)</font></td></tr>
+            <tr><td align="left"><font point-size="14" color="#1E293B">• <b>Egress Dispatch:</b> Real-time structured JSON API response to React Workbench &amp; SIEM-compliant RFC 4180 Batch CSV export</font></td></tr>
+        </table>>,
+        fillcolor="#FFF1F2",
+        color="#E11D48",
+        fontcolor="#881337",
+        width=10.2
+    ];
+
+    // =========================================================================
+    // FLOW EDGES
+    // =========================================================================
+    CLIENT -> GW [label="  POST /predict  |  POST /predict/batch  ", color="#2563EB", fontcolor="#1D4ED8"];
+    GW -> CACHE [label="  Domain SHA-256 Lookup  ", color="#D97706", fontcolor="#92400E"];
+    
+    CACHE -> FEAT [label="  Cache Miss  ", color="#0D9488", fontcolor="#0F766E"];
+    CACHE -> VERDICT [constraint=false, label="  Cache Hit (<100 µs Short-Circuit)  ", style="dashed", color="#D97706", fontcolor="#92400E"];
+    
+    FEAT -> S1 [label="  Standard-Scaled 13-D Feature Vector  ", color="#059669", fontcolor="#065F46"];
+    FEAT -> DRIFT [label="  Raw Lexical Values  ", style="dotted", color="#EA580C", fontcolor="#C2410C"];
+    
+    S1 -> SAFE [label="  P < 0.35 (Safe Disposition)  ", color="#10B981", fontcolor="#047857"];
+    S1 -> S2 [label="  P ≥ 0.35 (Non-Safe Disposition)  ", color="#6366F1", fontcolor="#4338CA"];
+    
+    SAFE -> VERDICT [constraint=false, label="  Safe / Allow Verdict (Bypasses Threat Attribution)  ", color="#10B981", fontcolor="#047857"];
+    
+    S2 -> SHAP [label="  Trigger TreeSHAP  ", color="#9333EA", fontcolor="#7E22CE"];
+    S2 -> DNS [label="  resolve_dns=true  ", style="dashed", color="#0284C7", fontcolor="#0369A1"];
+    
+    SHAP -> VERDICT [label="  Top-3 Risk Attributions  ", color="#9333EA", fontcolor="#7E22CE"];
+    DNS -> VERDICT [label="  Active C2 IP / NXDOMAIN State  ", style="dashed", color="#0284C7", fontcolor="#0369A1"];
+    DRIFT -> VERDICT [constraint=false, label="  KS Drift Metric  ", style="dotted", color="#EA580C", fontcolor="#C2410C"];
+}

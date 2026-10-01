@@ -1,0 +1,35 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dga-detector-backend
+    ports:
+      - "9000:8000"  # Host: 9000, Container: 8000
+    environment:
+      - FRONTEND_ORIGIN=http://localhost:3100,http://127.0.0.1:3100
+      - RATE_LIMIT_ENABLED=true
+      - CACHE_ENABLED=true
+      - CACHE_MAX_SIZE=10000
+      - EXPLAINABILITY_ENABLED=true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:9000
+    container_name: dga-detector-frontend
+    ports:
+      - "3100:80"    # Host: 3100, Container: 80
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

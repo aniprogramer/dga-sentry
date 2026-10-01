@@ -1,0 +1,46 @@
+flowchart TB
+
+  CLIENT["🖥️ React 19 SPA<br/>Investigation Workbench<br/>Bulk Audit · Port 3100"]
+
+  subgraph Ingress["API Gateway — FastAPI · Port 9000"]
+    GW["🛡️ Gateway<br/>Rate Limit · CORS<br/>RFC 1035 · IDN Decode"]
+    CACHE["💾 LRU Cache<br/>10K entries · thread-safe<br/>Hit: &lt;100 µs"]
+  end
+
+  subgraph Pipeline["Feature Extraction & Cascaded ML Engine"]
+    FEAT["⚙️ 13 Lexical Features<br/>Entropy · N-gram · Hex ratio<br/>Consonant runs · Wordninja"]
+    S1["🎯 Stage 1: XGBoost<br/>Binary Classifier<br/>F1 87.5% · AUC 0.945"]
+    SAFE["🟢 SAFE · P &lt; 0.35<br/>Action: ALLOW"]
+    S2["🕵️ Stage 2: Random Forest<br/>25-Family Attribution<br/>Emotet · Conficker · Gozi …"]
+  end
+
+  subgraph Output["Enrichment & SOC Verdict"]
+    SHAP["🧮 TreeSHAP<br/>Top-3 Risk Factors<br/>C++ booster · &lt;0.2 ms"]
+    DNS["🌐 Live DNS (opt-in)<br/>Active C2 vs NXDOMAIN<br/>dnspython · 2s timeout"]
+    VERDICT["📋 Enriched Verdict<br/>Safe · Suspicious · Malicious<br/>Family + SHAP + DNS"]
+  end
+
+  CLIENT -->|"POST /predict<br/>POST /predict/batch"| GW
+  GW --> CACHE
+  CACHE -->|"miss"| FEAT
+  CACHE -.->|"hit → cached result"| VERDICT
+  FEAT -->|"scaled 13-d vector"| S1
+  S1 -->|"P &lt; 0.35"| SAFE
+  S1 -->|"P ≥ 0.35 · non-safe"| S2
+  S2 --> SHAP
+  S2 -.->|"resolve_dns=true"| DNS
+  SAFE --> VERDICT
+  SHAP --> VERDICT
+  DNS -.-> VERDICT
+  VERDICT -->|"JSON response"| CLIENT
+
+  style CLIENT  fill:#DBEAFE,stroke:#2563EB,color:#1E3A5F
+  style GW      fill:#F1F5F9,stroke:#475569,color:#1E293B
+  style CACHE   fill:#FEF3C7,stroke:#D97706,color:#78350F
+  style FEAT    fill:#F8FAFC,stroke:#94A3B8,color:#334155
+  style S1      fill:#D1FAE5,stroke:#059669,color:#064E3B
+  style SAFE    fill:#ECFDF5,stroke:#10B981,color:#065F46
+  style S2      fill:#E0E7FF,stroke:#6366F1,color:#312E81
+  style SHAP    fill:#EDE9FE,stroke:#7C3AED,color:#4C1D95
+  style DNS     fill:#E0F2FE,stroke:#0284C7,color:#0C4A6E
+  style VERDICT fill:#FFE4E6,stroke:#E11D48,color:#881337
