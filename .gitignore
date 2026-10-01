@@ -41,10 +41,6 @@ backend/models/
 backend/data/raw/
 backend/data/processed/
 
-# =============================================================================
-# GENERATED EVALUATION PLOTS — Reproducible by running evaluate.py
-# =============================================================================
-backend/outputs/
 
 # =============================================================================
 # FRONTEND — Node & build
