@@ -6,6 +6,7 @@ import HistoryTable from "./components/HistoryTable";
 import BulkAudit from "./components/BulkAudit";
 import ModelMetricsDrift from "./components/ModelMetricsDrift";
 import QuickTestResults from "./components/QuickTestResults";
+import BrandMark from "./components/BrandMark";
 import { TestDomainSampler } from "./utils/testDomainPool";
 import {
   checkDomain,
@@ -32,6 +33,8 @@ function App() {
   const [error, setError] = useState<string | null>(null);
   const [modelInfo, setModelInfo] = useState<ModelInfoResponse | null>(null);
   const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking");
+  const [showAllStats, setShowAllStats] = useState(false);
+  const [showStatusPopover, setShowStatusPopover] = useState(false);
 
   const domainSampler = useMemo(() => new TestDomainSampler(), []);
 
@@ -148,46 +151,68 @@ function App() {
       <header className="soc-header">
         <div className="soc-header-inner">
           {/* Technical Brand & Console Identifier */}
-          <div className="soc-brand">
-            <span className="soc-brand-icon">⛨</span>
+          <div className="soc-brand" title="DGA Threat Intelligence Engine / SecOps Console">
+            <BrandMark className="soc-brand-mark" />
             <div className="soc-brand-text">
-              <span className="soc-brand-title">DGA THREAT INTELLIGENCE ENGINE</span>
+              <span className="soc-brand-title-full">DGA THREAT INTELLIGENCE ENGINE</span>
+              <span className="soc-brand-title-short">DGA SENTRY</span>
               <span className="soc-brand-sep">/</span>
               <span className="soc-brand-sub">SECOPS CONSOLE</span>
             </div>
           </div>
 
-          {/* Center: Segmented Industrial Switch */}
+          {/* Center / Mobile Bottom: Segmented Industrial Switch */}
           <nav className="soc-nav-switcher" aria-label="Main Navigation">
             <button
               type="button"
               className={`soc-nav-tab ${activeTab === "workbench" ? "active" : ""}`}
               onClick={() => setActiveTab("workbench")}
+              aria-current={activeTab === "workbench" ? "page" : undefined}
             >
+              <svg className="soc-nav-icon" width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+              </svg>
               <span className="soc-tab-indicator" />
-              <span>Investigation Workbench</span>
+              <span className="soc-tab-label-full">Investigation Workbench</span>
+              <span className="soc-tab-label-short">Workbench</span>
             </button>
             <button
               type="button"
               className={`soc-nav-tab ${activeTab === "bulk" ? "active" : ""}`}
               onClick={() => setActiveTab("bulk")}
+              aria-current={activeTab === "bulk" ? "page" : undefined}
             >
+              <svg className="soc-nav-icon" width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+              </svg>
               <span className="soc-tab-indicator" />
-              <span>Bulk DNS Telemetry Audit</span>
+              <span className="soc-tab-label-full">Bulk DNS Telemetry Audit</span>
+              <span className="soc-tab-label-short">Bulk Audit</span>
             </button>
             <button
               type="button"
               className={`soc-nav-tab ${activeTab === "metrics" ? "active" : ""}`}
               onClick={() => setActiveTab("metrics")}
+              aria-current={activeTab === "metrics" ? "page" : undefined}
             >
+              <svg className="soc-nav-icon" width="18" height="18" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+              </svg>
               <span className="soc-tab-indicator" />
-              <span>Model Metrics &amp; Drift</span>
+              <span className="soc-tab-label-full">Model Metrics &amp; Drift</span>
+              <span className="soc-tab-label-short">Metrics</span>
             </button>
           </nav>
 
           {/* Right: Engine Status Pills */}
           <div className="soc-header-telemetry">
-            <div className="soc-status-pill">
+            <button
+              type="button"
+              className="soc-status-pill"
+              onClick={() => setShowStatusPopover((prev) => !prev)}
+              aria-expanded={showStatusPopover}
+              aria-label="System status telemetry"
+            >
               <span className={`soc-status-led ${backendStatus}`} />
               <span className="soc-status-label">
                 {backendStatus === "online"
@@ -196,9 +221,33 @@ function App() {
                   ? "SYNCING"
                   : "DISCONNECTED"}
               </span>
-            </div>
+              <span className="soc-status-chevron" aria-hidden="true">▾</span>
+            </button>
             <span className="soc-telemetry-item font-mono">LATENCY &lt; 1ms</span>
             <span className="soc-telemetry-item font-mono">CACHE: ACTIVE</span>
+
+            {showStatusPopover && (
+              <div className="soc-status-popover" role="dialog" aria-label="System Telemetry Details">
+                <div className="soc-popover-item">
+                  <span className="soc-popover-label">ENGINE STATUS</span>
+                  <span className={`soc-popover-val ${backendStatus}`}>
+                    {backendStatus === "online"
+                      ? "SYSTEM READY"
+                      : backendStatus === "checking"
+                      ? "SYNCING"
+                      : "DISCONNECTED"}
+                  </span>
+                </div>
+                <div className="soc-popover-item">
+                  <span className="soc-popover-label">INFERENCE LATENCY</span>
+                  <span className="soc-popover-val font-mono">&lt; 1ms</span>
+                </div>
+                <div className="soc-popover-item">
+                  <span className="soc-popover-label">PREDICTION CACHE</span>
+                  <span className="soc-popover-val font-mono text-emerald-400">ACTIVE</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -231,21 +280,31 @@ function App() {
           <div className="soc-rail-divider" />
 
           <div className="soc-rail-item">
-            <span className="soc-rail-label">FEATURE MATRIX</span>
-            <span className="soc-rail-value font-mono">13 DIM (FANCI RFC)</span>
-          </div>
-          <div className="soc-rail-divider" />
-
-          <div className="soc-rail-item">
             <span className="soc-rail-label">OPERATING FPR</span>
             <span className="soc-rail-value font-mono text-amber-400">&lt; 0.5% (p &ge; 0.75)</span>
           </div>
           <div className="soc-rail-divider" />
 
-          <div className="soc-rail-item">
+          <div className={`soc-rail-item ${showAllStats ? "mobile-show" : "mobile-hidden"}`}>
+            <span className="soc-rail-label">FEATURE MATRIX</span>
+            <span className="soc-rail-value font-mono">13 DIM (FANCI RFC)</span>
+          </div>
+          <div className={`soc-rail-divider ${showAllStats ? "mobile-show" : "mobile-hidden"}`} />
+
+          <div className={`soc-rail-item ${showAllStats ? "mobile-show" : "mobile-hidden"}`}>
             <span className="soc-rail-label">EXPLAINABILITY</span>
             <span className="soc-rail-value font-mono text-[#9CA3AF]">TreeSHAP v0.44</span>
           </div>
+
+          <button
+            type="button"
+            className="soc-rail-toggle-btn"
+            onClick={() => setShowAllStats((prev) => !prev)}
+            aria-expanded={showAllStats}
+            aria-label="Toggle extra model telemetry"
+          >
+            {showAllStats ? "▴ Less" : "▾ More (2)"}
+          </button>
         </div>
       </section>
 

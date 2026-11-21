@@ -20,12 +20,12 @@ const FEATURE_LABELS: Record<string, string> = {
   entropy: "Entropy",
   n_gram_score: "N-gram Score",
   length: "Length",
-  vowel_consonant_ratio: "Vowel/Consonant",
+  vowel_consonant_ratio: "Vowel/Cons.",
   digit_ratio: "Digit Ratio",
-  hex_char_ratio: "Hex Char Ratio",
+  hex_char_ratio: "Hex Ratio",
   gini_index: "Gini Index",
-  max_consonant_run: "Max Consonant Run",
-  unique_char_ratio: "Unique Char Ratio",
+  max_consonant_run: "Max Cons. Run",
+  unique_char_ratio: "Unique Ratio",
   digit_first: "Digit First",
 };
 
@@ -98,40 +98,42 @@ export default function ConfidenceChart({
         </svg>
         Feature Breakdown
       </h3>
-      <ResponsiveContainer width="100%" height={320}>
-        <BarChart
-          data={data}
-          layout="vertical"
-          margin={{ top: 5, right: 30, left: 100, bottom: 5 }}
-        >
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.06)"
-          />
-          <XAxis
-            type="number"
-            tick={{ fill: "#94a3b8", fontSize: 12 }}
-            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-          />
-          <YAxis
-            type="category"
-            dataKey="name"
-            tick={{ fill: "#cbd5e1", fontSize: 12 }}
-            axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-            width={95}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Bar dataKey="value" radius={[0, 4, 4, 0]} animationDuration={800}>
-            {data.map((_, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={index < 3 ? barColor : barColorLight}
-                fillOpacity={index < 3 ? 0.9 : 0.5}
-              />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="chart-wrapper">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            layout="vertical"
+            margin={{ top: 5, right: 15, left: 10, bottom: 5 }}
+          >
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="rgba(255,255,255,0.06)"
+            />
+            <XAxis
+              type="number"
+              tick={{ fill: "#94a3b8", fontSize: 12 }}
+              axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+            />
+            <YAxis
+              type="category"
+              dataKey="name"
+              tick={{ fill: "#cbd5e1", fontSize: 11 }}
+              axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+              width={85}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Bar dataKey="value" radius={[0, 4, 4, 0]} animationDuration={800}>
+              {data.map((_, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={index < 3 ? barColor : barColorLight}
+                  fillOpacity={index < 3 ? 0.9 : 0.5}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 }

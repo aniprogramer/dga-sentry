@@ -657,20 +657,20 @@ export default function BulkAudit() {
                         <tr
                           className={`bulk-row ${isExpanded ? "expanded" : ""}`}
                         >
-                          <td className="domain-cell">
+                          <td data-label="Domain" className="domain-cell">
                             <code>{r.domain}</code>
                           </td>
-                          <td>
+                          <td data-label="Risk Tier">
                             <span className={`tier-badge ${r.risk_tier}`}>
                               {r.risk_tier.toUpperCase()}
                             </span>
                           </td>
-                          <td>
+                          <td data-label="Action">
                             <span className={`action-badge ${r.action}`}>
                               {r.action.toUpperCase()}
                             </span>
                           </td>
-                          <td className="dns-cell">
+                          <td data-label="DNS State" className="dns-cell">
                             {r.dns_enrichment ? (
                               <span
                                 className={`dns-table-badge ${
@@ -694,7 +694,7 @@ export default function BulkAudit() {
                               <span className="none-label">—</span>
                             )}
                           </td>
-                          <td>
+                          <td data-label="Malicious Prob">
                             <div className="prob-bar-container">
                               <div className="prob-track">
                                 <div
@@ -709,7 +709,7 @@ export default function BulkAudit() {
                               </span>
                             </div>
                           </td>
-                          <td className="family-cell">
+                          <td data-label="Threat Attribution" className="family-cell">
                             {r.family && r.family !== "legitimate" ? (
                               <span className="threat-family-badge">
                                 <strong>{r.family}</strong>
@@ -724,7 +724,7 @@ export default function BulkAudit() {
                               <span className="clean-label">Legitimate</span>
                             )}
                           </td>
-                          <td className="factor-cell">
+                          <td data-label="Top Risk Factor" className="factor-cell">
                             {topFactor ? (
                               <span className="factor-pill">
                                 {topFactor.display_name}: +{topFactor.impact.toFixed(2)}
@@ -733,7 +733,7 @@ export default function BulkAudit() {
                               <span className="none-label">—</span>
                             )}
                           </td>
-                          <td>
+                          <td data-label="Details" className="expand-cell">
                             <button
                               type="button"
                               className="expand-btn"

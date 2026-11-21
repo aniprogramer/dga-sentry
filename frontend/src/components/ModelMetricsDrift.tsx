@@ -194,22 +194,22 @@ export default function ModelMetricsDrift() {
                   <tbody>
                     {Object.entries(driftReport.features).map(([fKey, metrics]) => (
                       <tr key={fKey} className={`soc-row ${metrics.drifted ? "row-malicious" : "row-safe"}`}>
-                        <td className="font-mono text-xs text-[#F3F4F6]">{fKey}</td>
-                        <td className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="Feature Dimension" className="font-mono text-xs text-[#F3F4F6] domain-cell">{fKey}</td>
+                        <td data-label="KS Statistic" className="font-mono text-xs text-right text-[#9CA3AF]">
                           {metrics.ks_statistic.toFixed(4)}
                         </td>
-                        <td className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="p-Value" className="font-mono text-xs text-right text-[#9CA3AF]">
                           {metrics.p_value.toFixed(6)}
                         </td>
-                        <td className="text-center">
+                        <td data-label="Drift State" className="text-center">
                           <span className={`soc-tag ${metrics.drifted ? "tag-malicious" : "tag-safe"}`}>
                             {metrics.drifted ? "DRIFTED" : "HEALTHY"}
                           </span>
                         </td>
-                        <td className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="Baseline Mean &plusmn; Std" className="font-mono text-xs text-right text-[#9CA3AF]">
                           {metrics.baseline_mean.toFixed(2)} &plusmn; {metrics.baseline_std.toFixed(2)}
                         </td>
-                        <td className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="Inference Mean &plusmn; Std" className="font-mono text-xs text-right text-[#9CA3AF]">
                           {metrics.current_mean.toFixed(2)} &plusmn; {metrics.current_std.toFixed(2)}
                         </td>
                       </tr>

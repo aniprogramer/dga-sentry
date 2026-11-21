@@ -47,15 +47,15 @@ export default function HistoryTable({ history, onClear }: HistoryTableProps) {
 
               return (
                 <tr key={`${item.domain}-${i}`} className={`soc-row row-${tier}`}>
-                  <td className="font-mono text-xs text-[#F3F4F6]">
+                  <td data-label="Domain" className="font-mono text-xs text-[#F3F4F6] domain-cell">
                     <code>{item.domain}</code>
                   </td>
-                  <td>
+                  <td data-label="Risk Tier">
                     <span className={`soc-tag tag-${tier}`}>
                       {tier.toUpperCase()}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Malicious Prob">
                     <div className="soc-prob-cell">
                       <div className="soc-prob-track">
                         <div
@@ -68,16 +68,16 @@ export default function HistoryTable({ history, onClear }: HistoryTableProps) {
                       </span>
                     </div>
                   </td>
-                  <td className="font-mono text-xs text-[#9CA3AF]">
+                  <td data-label="Threat Family" className="font-mono text-xs text-[#9CA3AF]">
                     {item.family && item.family !== "legitimate" ? item.family : "—"}
                   </td>
-                  <td className="font-mono text-xs text-right text-[#9CA3AF]">
+                  <td data-label="Entropy" className="font-mono text-xs text-right text-[#9CA3AF]">
                     {item.features.entropy.toFixed(2)}
                   </td>
-                  <td className="font-mono text-xs text-right text-[#9CA3AF]">
+                  <td data-label="N-Gram LogP" className="font-mono text-xs text-right text-[#9CA3AF]">
                     {item.features.n_gram_score.toFixed(2)}
                   </td>
-                  <td className="font-mono text-xs text-right text-[#64748B]">
+                  <td data-label="Timestamp" className="font-mono text-xs text-right text-[#64748B]">
                     {item.timestamp}
                   </td>
                 </tr>

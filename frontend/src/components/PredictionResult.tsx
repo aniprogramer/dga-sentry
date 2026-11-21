@@ -199,11 +199,14 @@ export default function PredictionResultCard({
 
       {/* 3. TreeSHAP Feature Attribution (If available) */}
       {result.top_risk_factors && result.top_risk_factors.length > 0 && (
-        <div className="soc-section-container">
-          <div className="soc-section-title">
-            <span className="soc-title-icon">✦</span>
-            <span>TREESHAP MARGINAL RISK ATTRIBUTION (TOP 3 DRIVERS)</span>
-          </div>
+        <details className="soc-details-section" open>
+          <summary className="soc-details-summary">
+            <span className="soc-section-title">
+              <span className="soc-title-icon">✦</span>
+              <span>TREESHAP MARGINAL RISK ATTRIBUTION (TOP 3 DRIVERS)</span>
+            </span>
+            <span className="soc-details-chevron" aria-hidden="true">▼</span>
+          </summary>
           <div className="soc-shap-list">
             {result.top_risk_factors.map((rf) => (
               <div key={rf.feature} className="soc-shap-item">
@@ -223,16 +226,19 @@ export default function PredictionResultCard({
               </div>
             ))}
           </div>
-        </div>
+        </details>
       )}
 
       {/* 4. Live DNS Telemetry Callout (If resolved) */}
       {result.dns_enrichment && (
-        <div className="soc-section-container">
-          <div className="soc-section-title">
-            <span className="soc-title-icon">⛨</span>
-            <span>LIVE DNS &amp; C2 INFRASTRUCTURE TELEMETRY</span>
-          </div>
+        <details className="soc-details-section" open>
+          <summary className="soc-details-summary">
+            <span className="soc-section-title">
+              <span className="soc-title-icon">⛨</span>
+              <span>LIVE DNS &amp; C2 INFRASTRUCTURE TELEMETRY</span>
+            </span>
+            <span className="soc-details-chevron" aria-hidden="true">▼</span>
+          </summary>
           <div className={`soc-dns-advisory ${result.dns_enrichment.operational_status === "active" && isMalicious ? "adv-danger" : "adv-neutral"}`}>
             <span className="soc-adv-badge">SOC ADVISORY</span>
             <span className="soc-adv-text">{result.dns_enrichment.threat_summary}</span>
@@ -263,15 +269,18 @@ export default function PredictionResultCard({
               </div>
             )}
           </div>
-        </div>
+        </details>
       )}
 
       {/* 5. 13 Lexical Features Grid */}
-      <div className="soc-section-container">
-        <div className="soc-section-title">
-          <span className="soc-title-icon">≡</span>
-          <span>LEXICAL &amp; STATISTICAL FEATURE TENSORS (13 DIM)</span>
-        </div>
+      <details className="soc-details-section" open>
+        <summary className="soc-details-summary">
+          <span className="soc-section-title">
+            <span className="soc-title-icon">≡</span>
+            <span>LEXICAL &amp; STATISTICAL FEATURE TENSORS (13 DIM)</span>
+          </span>
+          <span className="soc-details-chevron" aria-hidden="true">▼</span>
+        </summary>
         <div className="soc-features-grid">
           {FEATURE_NAMES_ORDER.map((featKey) => {
             const rawVal = (result.features as unknown as Record<string, number>)[featKey];
@@ -286,7 +295,7 @@ export default function PredictionResultCard({
             );
           })}
         </div>
-      </div>
+      </details>
     </div>
   );
 }
