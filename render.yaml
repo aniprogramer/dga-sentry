@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: dga-sentry-api
+    runtime: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: FRONTEND_ORIGIN
+        sync: false # set to your Netlify URL, e.g. https://dga-sentry.netlify.app
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: CACHE_ENABLED
+        value: "true"
+      - key: CACHE_MAX_SIZE
+        value: "2000"
+      - key: EXPLAINABILITY_ENABLED
+        value: "true"
