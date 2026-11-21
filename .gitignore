@@ -34,13 +34,17 @@ backend/mlruns/
 # TRAINED MODEL ARTIFACTS — Reproducible by running train.py
 # =============================================================================
 backend/models/*
-# Small models needed by the Render deploy are tracked
+# The 7 files the backend Dockerfile copies are tracked (needed by the Render deploy)
 !backend/models/best_model.joblib
 !backend/models/scaler.joblib
 !backend/models/model_info.joblib
 !backend/models/ngram_model.pkl
 !backend/models/baseline_reference.npz
-# family_model.joblib (378MB) stays untracked: exceeds Render free 512MB RAM
+!backend/models/family_model.joblib
+!backend/models/family_encoder.joblib
+# test_data.npz stays untracked (evaluation only). Retrain with the smaller
+# family model before committing: a 378MB family_model.joblib exceeds GitHub's
+# 100MB file limit and Render's free 512MB RAM.
 
 # =============================================================================
 # DATASETS — Raw & processed data (reproducible via data_prep.py)

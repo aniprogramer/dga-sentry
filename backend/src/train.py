@@ -216,9 +216,13 @@ def train_family_classifier(
     y_train_enc = encoder.fit_transform(y_train_fam)
     y_val_enc = encoder.transform(y_val_fam)
 
+    # Sized for deployment: 150 trees / depth 16 gave a ~378 MB model, over
+    # GitHub's 100 MB file limit and Render's 512 MB RAM. These settings give
+    # ~46 MB in memory (~9 MB compressed) for about 0.7 pt lower accuracy.
     family_model = RandomForestClassifier(
-        n_estimators=150,
-        max_depth=16,
+        n_estimators=60,
+        max_depth=14,
+        min_samples_leaf=10,
         random_state=42,
         n_jobs=-1,
     )
@@ -403,7 +407,7 @@ def run_training() -> dict:
 
     family_model_path = MODELS_DIR / "family_model.joblib"
     family_encoder_path = MODELS_DIR / "family_encoder.joblib"
-    joblib.dump(family_model, family_model_path)
+    joblib.dump(family_model, family_model_path, compress=3)
     joblib.dump(family_encoder, family_encoder_path)
     logger.info("Saved family attribution model to %s and encoder to %s", family_model_path, family_encoder_path)
 
