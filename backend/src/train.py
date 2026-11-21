@@ -336,7 +336,7 @@ def run_training() -> dict:
     baseline_sample_size = min(2500, len(X_val_unscaled))
     rng = np.random.default_rng(42)
     indices = rng.choice(len(X_val_unscaled), size=baseline_sample_size, replace=False)
-    baseline_sample = X_val_unscaled[indices]
+    baseline_sample = np.asarray(X_val_unscaled)[indices]
     baseline_path = MODELS_DIR / "baseline_reference.npz"
     np.savez(baseline_path, baseline=baseline_sample, feature_names=np.array(FEATURE_NAMES))
     logger.info("Saved baseline reference (%d samples) to %s", len(baseline_sample), baseline_path)
