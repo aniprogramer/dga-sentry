@@ -1,11 +1,17 @@
 # Frontend Dockerfile — Multi-stage build
 # Stage 1: Build the Vite app
-FROM node:20-slim AS builder
+# Node 22: vite 8 and vitest 5 in package-lock.json need Node >=20.19 / >=22.12
+FROM node:22-slim AS builder
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci
+# --include=dev: the build needs devDependencies (typescript, vite), even if
+# NODE_ENV=production or npm's omit=dev setting is present in the environment
+# Mirror: registry.npmjs.org resets connections on some networks (same packages)
+ARG NPM_REGISTRY=https://registry.yarnpkg.com
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --include=dev --registry=$NPM_REGISTRY --fetch-retries=5
 
 COPY . .
 
