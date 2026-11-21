@@ -16,14 +16,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Copy only what the API needs
 COPY src/ ./backend/src/
-COPY models/best_model.joblib \
-     models/scaler.joblib \
-     models/model_info.joblib \
-     models/ngram_model.pkl \
-     models/family_model.joblib \
-     models/family_encoder.joblib \
-     models/baseline_reference.npz \
-     ./backend/models/
+# Copies whatever model files are present (family model is optional at runtime)
+COPY models/ ./backend/models/
 
 # Non-root user for security
 RUN useradd --create-home appuser && chown -R appuser:appuser /app
@@ -36,4 +30,5 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" || exit 1
 
 # Start the application
-CMD ["uvicorn", "backend.src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Render injects $PORT
+CMD ["sh", "-c", "uvicorn backend.src.api.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

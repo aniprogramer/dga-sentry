@@ -8,3 +8,6 @@ htmlcov
 .env
 mlruns
 outputs
+data
+tests
+models/test_data.npz
