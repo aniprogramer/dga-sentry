@@ -1,4 +1,12 @@
 <p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="frontend/public/logo-horizontal.svg">
+    <source media="(prefers-color-scheme: light)" srcset="frontend/public/logo-horizontal-light.svg">
+    <img alt="DGA Sentry" src="frontend/public/logo-horizontal.svg" width="480">
+  </picture>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11"/>
   <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/React_19-61DAFB?logo=react&logoColor=black" alt="React 19"/>
@@ -265,12 +273,13 @@ dga-sentry/
 │   │       ├── cache.py              # Thread-safe LRU prediction cache
 │   │       ├── dns_resolver.py       # Async live DNS & C2 telemetry resolver
 │   │       └── drift_detector.py     # Kolmogorov-Smirnov concept drift monitor
-│   ├── data/                         # Raw + processed datasets
-│   ├── models/                       # Saved model artifacts (.joblib)
+│   ├── data/                         # Raw + processed datasets (not tracked)
+│   ├── models/                       # Trained artifacts (.joblib, .pkl, .npz)
 │   ├── outputs/plots/                # Evaluation visualizations
-│   ├── tests/                        # pytest test suite
+│   ├── tests/                        # pytest test suite (API + features)
 │   ├── Dockerfile
-│   └── requirements.txt
+│   ├── requirements.txt              # Full deps (training + dev)
+│   └── requirements-prod.txt         # Slim runtime deps for serving
 ├── frontend/
 │   ├── src/
 │   │   ├── App.tsx                   # Main application with tab navigation
@@ -279,22 +288,30 @@ dga-sentry/
 │   │   │   ├── PredictionResult.tsx  # Rich prediction display with SHAP & DNS
 │   │   │   ├── ConfidenceChart.tsx   # Interactive feature breakdown chart
 │   │   │   ├── BulkAudit.tsx         # Bulk DNS log audit with CSV export
-│   │   │   ├── ModelMetricsDrift.tsx  # Model metrics & drift monitoring dashboard
+│   │   │   ├── ModelMetricsDrift.tsx # Model metrics & drift monitoring dashboard
 │   │   │   ├── HistoryTable.tsx      # Session audit log
 │   │   │   └── QuickTestResults.tsx  # Sample batch test results
-│   │   └── api/client.ts            # Typed API client
+│   │   ├── api/client.ts             # Typed API client
+│   │   └── utils/
+│   │       ├── domainExtractor.ts    # Domain parsing from log lines
+│   │       └── testDomainPool.ts     # Sample domains for quick tests
 │   ├── tests/                        # Vitest component tests
 │   ├── Dockerfile
+│   ├── vite.config.ts
 │   └── package.json
 ├── docs/
 │   ├── figures/                      # Architecture diagram & UI screenshots
-│   └── report.tex                    # Academic capstone report (LaTeX)
+│   ├── architecture.dot              # Graphviz architecture source
+│   └── architecture.mmd              # Mermaid architecture source
 ├── test/
-│   └── dga_simulation.py            # DGA family simulation for testing
-├── .github/workflows/               # CI pipeline (lint + test + build)
+│   └── dga_simulation.py             # DGA family simulation for testing
+├── .github/workflows/ci.yml          # CI pipeline (lint + test + build)
 ├── docker-compose.yml
+├── netlify.toml                      # Frontend deployment (Netlify)
+├── render.yaml                       # Backend deployment (Render)
 ├── ARCHITECTURE.md                   # Detailed design decisions & trade-offs
 ├── EVALUATION.md                     # Model evaluation analysis
+├── LICENSE
 └── README.md
 ```
 
