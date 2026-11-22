@@ -28,6 +28,14 @@
     <title>DGA Sentry — Malicious Domain Detection</title>
   </head>
   <body>
+    <script>
+      (function () {
+        var stored = localStorage.getItem("dga-theme");
+        var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var theme = stored === "light" || stored === "dark" ? stored : (prefersDark ? "dark" : "light");
+        if (theme === "light") document.documentElement.setAttribute("data-theme", "light");
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
