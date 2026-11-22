@@ -7,6 +7,7 @@ import BulkAudit from "./components/BulkAudit";
 import ModelMetricsDrift from "./components/ModelMetricsDrift";
 import QuickTestResults from "./components/QuickTestResults";
 import BrandMark from "./components/BrandMark";
+import AboutPage from "./components/AboutPage";
 import { TestDomainSampler } from "./utils/testDomainPool";
 import {
   checkDomain,
@@ -19,7 +20,21 @@ import {
 } from "./api/client";
 import "./App.css";
 
-type TabMode = "workbench" | "bulk" | "metrics";
+type TabMode = "workbench" | "bulk" | "metrics" | "about";
+
+// Hash routes: #/ , #/bulk , #/metrics , #/about , #/about#how-it-works
+const TAB_PATHS: Record<TabMode, string> = {
+  workbench: "/",
+  bulk: "/bulk",
+  metrics: "/metrics",
+  about: "/about",
+};
+
+function parseHash(hash: string): { tab: TabMode; section?: string } {
+  const [path, section] = hash.replace(/^#/, "").split("#");
+  const tab = (Object.keys(TAB_PATHS) as TabMode[]).find((t) => TAB_PATHS[t] === path);
+  return { tab: tab ?? "workbench", section: section || undefined };
+}
 type ThemeMode = "system" | "light" | "dark";
 type HistoryEntry = PredictionResult & { timestamp: string };
 
@@ -33,7 +48,30 @@ function getInitialTheme(): ThemeMode {
 }
 
 function App() {
-  const [activeTab, setActiveTab] = useState<TabMode>("workbench");
+  const [route, setRoute] = useState(() => parseHash(window.location.hash));
+  const activeTab = route.tab;
+  const focusInputOnWorkbench = useRef(false);
+  const setActiveTab = useCallback((tab: TabMode) => {
+    window.location.hash = TAB_PATHS[tab]; // pushes history; hashchange updates the view
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => setRoute(parseHash(window.location.hash));
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "workbench" && focusInputOnWorkbench.current) {
+      focusInputOnWorkbench.current = false;
+      document.getElementById("domain-input")?.focus();
+    }
+  }, [activeTab]);
+
+  const handleTryIt = useCallback(() => {
+    focusInputOnWorkbench.current = true;
+    setActiveTab("workbench");
+  }, [setActiveTab]);
   const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => {
     if (typeof window === "undefined") return "dark";
@@ -308,6 +346,20 @@ function App() {
               <span className="soc-tab-label-full">Model Metrics &amp; Drift</span>
               <span className="soc-tab-label-short">Metrics</span>
             </button>
+            <button
+              type="button"
+              className={`soc-nav-tab ${activeTab === "about" ? "active" : ""}`}
+              onClick={() => setActiveTab("about")}
+              aria-current={activeTab === "about" ? "page" : undefined}
+              id="about-nav-tab"
+            >
+              <svg className="soc-nav-icon" width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <span className="soc-tab-indicator" />
+              <span className="soc-tab-label-full">About</span>
+              <span className="soc-tab-label-short">About</span>
+            </button>
           </nav>
 
           {/* Right: Engine Status Pills & Theme Switcher */}
@@ -472,6 +524,9 @@ function App() {
                 onRunTest={handleRunTest}
                 isTesting={isTesting}
               />
+              <p className="soc-help-link">
+                <a href="#/about#how-it-works">How does this work?</a>
+              </p>
             </section>
 
             {/* Quick Test Results (Non-Repeating Sample Batch) */}
@@ -568,6 +623,9 @@ function App() {
           </div>
         )}
 
+        {/* Tab 4: About */}
+        {activeTab === "about" && <AboutPage section={route.section} onTryIt={handleTryIt} />}
+
         {/* Tab 3: Model Metrics & Drift */}
         {activeTab === "metrics" && (
           <div className="soc-metrics-layout">
@@ -623,6 +681,8 @@ function App() {
               <span>13-Dimensional Linguistic Tensor</span>
               <span className="soc-dot-sep">·</span>
               <span>Zero-Telemetry Local Processing</span>
+              <span className="soc-dot-sep">·</span>
+              <a href="#/about" className="soc-footer-link">About</a>
             </div>
             <div className="soc-footer-posture font-mono">
               <span className="soc-status-pip" aria-hidden="true" />
