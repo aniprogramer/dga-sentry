@@ -47,7 +47,7 @@ export default function HistoryTable({ history, onClear }: HistoryTableProps) {
 
               return (
                 <tr key={`${item.domain}-${i}`} className={`soc-row row-${tier}`}>
-                  <td data-label="Domain" className="font-mono text-xs text-[#F3F4F6] domain-cell">
+                  <td data-label="Domain" className="font-mono text-xs text-[var(--text-primary)] domain-cell">
                     <code>{item.domain}</code>
                   </td>
                   <td data-label="Risk Tier">
@@ -63,21 +63,21 @@ export default function HistoryTable({ history, onClear }: HistoryTableProps) {
                           style={{ width: `${Math.round(item.malicious_probability * 100)}%` }}
                         />
                       </div>
-                      <span className="font-mono text-xs text-[#9CA3AF]">
+                      <span className="font-mono text-xs text-[var(--text-secondary)]">
                         {(item.malicious_probability * 100).toFixed(1)}%
                       </span>
                     </div>
                   </td>
-                  <td data-label="Threat Family" className="font-mono text-xs text-[#9CA3AF]">
+                  <td data-label="Threat Family" className="font-mono text-xs text-[var(--text-secondary)]">
                     {item.family && item.family !== "legitimate" ? item.family : "—"}
                   </td>
-                  <td data-label="Entropy" className="font-mono text-xs text-right text-[#9CA3AF]">
+                  <td data-label="Entropy" className="font-mono text-xs text-right text-[var(--text-secondary)]">
                     {item.features.entropy.toFixed(2)}
                   </td>
-                  <td data-label="N-Gram LogP" className="font-mono text-xs text-right text-[#9CA3AF]">
+                  <td data-label="N-Gram LogP" className="font-mono text-xs text-right text-[var(--text-secondary)]">
                     {item.features.n_gram_score.toFixed(2)}
                   </td>
-                  <td data-label="Timestamp" className="font-mono text-xs text-right text-[#64748B]">
+                  <td data-label="Timestamp" className="font-mono text-xs text-right text-[var(--text-muted)]">
                     {item.timestamp}
                   </td>
                 </tr>

@@ -9,10 +9,18 @@ import {
   Cell,
 } from "recharts";
 import type { PredictionFeatures } from "../api/client";
+import { useMemo } from "react";
+
+function getCSSVar(name: string, fallback: string = ""): string {
+  if (typeof window === "undefined") return fallback;
+  const val = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return val || fallback;
+}
 
 interface ConfidenceChartProps {
   features: PredictionFeatures;
   label: "legitimate" | "malicious";
+  themeKey?: string;
 }
 
 // Human-readable feature names for display
@@ -67,6 +75,7 @@ function CustomTooltip({
 export default function ConfidenceChart({
   features,
   label,
+  themeKey,
 }: ConfidenceChartProps) {
   // Prepare data for chart — sort by absolute value for visual impact
   const data = Object.entries(features)
@@ -77,8 +86,23 @@ export default function ConfidenceChart({
     }))
     .sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
 
-  const barColor = label === "malicious" ? "#ef4444" : "#10b981";
-  const barColorLight = label === "malicious" ? "#fca5a5" : "#6ee7b7";
+  const { barColor, barColorLight, gridStroke, axisStroke, tickX, tickY } = useMemo(() => {
+    const isLight =
+      themeKey === "light" ||
+      (typeof document !== "undefined" && document.documentElement.getAttribute("data-theme") === "light");
+    return {
+      barColor: label === "malicious"
+        ? getCSSVar("--color-malicious", isLight ? "#E11D48" : "#F43F5E")
+        : getCSSVar("--color-safe", isLight ? "#059669" : "#10B981"),
+      barColorLight: label === "malicious"
+        ? getCSSVar("--text-malicious", isLight ? "#BE123C" : "#FDA4AF")
+        : getCSSVar("--text-safe", isLight ? "#047857" : "#34D399"),
+      gridStroke: getCSSVar("--chart-grid", isLight ? "rgba(0,0,0,0.07)" : "rgba(255,255,255,0.06)"),
+      axisStroke: getCSSVar("--chart-axis", isLight ? "rgba(0,0,0,0.12)" : "rgba(255,255,255,0.1)"),
+      tickX: getCSSVar("--chart-tick-x", isLight ? "#64748B" : "#94a3b8"),
+      tickY: getCSSVar("--chart-tick-y", isLight ? "#475569" : "#cbd5e1"),
+    };
+  }, [label, themeKey]);
 
   return (
     <div className="chart-container">
@@ -107,18 +131,18 @@ export default function ConfidenceChart({
           >
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.06)"
+              stroke={gridStroke}
             />
             <XAxis
               type="number"
-              tick={{ fill: "#94a3b8", fontSize: 12 }}
-              axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+              tick={{ fill: tickX, fontSize: 12 }}
+              axisLine={{ stroke: axisStroke }}
             />
             <YAxis
               type="category"
               dataKey="name"
-              tick={{ fill: "#cbd5e1", fontSize: 11 }}
-              axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+              tick={{ fill: tickY, fontSize: 11 }}
+              axisLine={{ stroke: axisStroke }}
               width={85}
             />
             <Tooltip content={<CustomTooltip />} />

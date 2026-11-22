@@ -73,7 +73,7 @@ export default function ModelMetricsDrift() {
       <div className="soc-metrics-cards-grid">
         <div className="soc-stat-card">
           <span className="soc-stat-label">PRIMARY MODEL ARCHITECTURE</span>
-          <span className="soc-stat-val text-white font-mono">
+          <span className="soc-stat-val text-[var(--text-primary)] font-mono">
             {modelInfo ? modelInfo.model_type.toUpperCase() : "XGBOOST V2.1"}
           </span>
           <span className="soc-stat-desc">Stage-1 Binary Classifier</span>
@@ -81,7 +81,7 @@ export default function ModelMetricsDrift() {
 
         <div className="soc-stat-card">
           <span className="soc-stat-label">VALIDATION F1-SCORE</span>
-          <span className="soc-stat-val text-emerald-400 font-mono">
+          <span className="soc-stat-val text-[var(--text-safe)] font-mono">
             {metrics ? `${(metrics.f1_score * 100).toFixed(2)}%` : "87.54%"}
           </span>
           <span className="soc-stat-desc">Macro F1 on Holdout Split</span>
@@ -89,7 +89,7 @@ export default function ModelMetricsDrift() {
 
         <div className="soc-stat-card">
           <span className="soc-stat-label">AREA UNDER ROC (AUC)</span>
-          <span className="soc-stat-val text-sky-400 font-mono">
+          <span className="soc-stat-val text-[var(--text-active)] font-mono">
             {metrics ? (metrics.roc_auc).toFixed(4) : "0.9454"}
           </span>
           <span className="soc-stat-desc">Discriminative Capability</span>
@@ -97,7 +97,7 @@ export default function ModelMetricsDrift() {
 
         <div className="soc-stat-card">
           <span className="soc-stat-label">TRAINING CORPUS SAMPLES</span>
-          <span className="soc-stat-val text-[#F3F4F6] font-mono">
+          <span className="soc-stat-val text-[var(--text-primary)] font-mono">
             {modelInfo ? modelInfo.train_size.toLocaleString() : "47,250"}
           </span>
           <span className="soc-stat-desc">v1_domains.csv (FANCI Dataset)</span>
@@ -170,7 +170,7 @@ export default function ModelMetricsDrift() {
               </div>
               <div className="soc-drift-stat">
                 <span className="label">RECOMMENDED ACTION</span>
-                <span className={`val font-mono ${driftReport.recommended_action === "healthy" ? "text-emerald-400" : "text-rose-400"}`}>
+                <span className={`val font-mono ${driftReport.recommended_action === "healthy" ? "text-[var(--text-safe)]" : "text-[var(--text-malicious)]"}`}>
                   {driftReport.recommended_action.replace(/_/g, " ").toUpperCase()}
                 </span>
                 <span className="sub">Automated pipeline health</span>
@@ -194,11 +194,11 @@ export default function ModelMetricsDrift() {
                   <tbody>
                     {Object.entries(driftReport.features).map(([fKey, metrics]) => (
                       <tr key={fKey} className={`soc-row ${metrics.drifted ? "row-malicious" : "row-safe"}`}>
-                        <td data-label="Feature Dimension" className="font-mono text-xs text-[#F3F4F6] domain-cell">{fKey}</td>
-                        <td data-label="KS Statistic" className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="Feature Dimension" className="font-mono text-xs text-[var(--text-primary)] domain-cell">{fKey}</td>
+                        <td data-label="KS Statistic" className="font-mono text-xs text-right text-[var(--text-secondary)]">
                           {metrics.ks_statistic.toFixed(4)}
                         </td>
-                        <td data-label="p-Value" className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="p-Value" className="font-mono text-xs text-right text-[var(--text-secondary)]">
                           {metrics.p_value.toFixed(6)}
                         </td>
                         <td data-label="Drift State" className="text-center">
@@ -206,10 +206,10 @@ export default function ModelMetricsDrift() {
                             {metrics.drifted ? "DRIFTED" : "HEALTHY"}
                           </span>
                         </td>
-                        <td data-label="Baseline Mean &plusmn; Std" className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="Baseline Mean &plusmn; Std" className="font-mono text-xs text-right text-[var(--text-secondary)]">
                           {metrics.baseline_mean.toFixed(2)} &plusmn; {metrics.baseline_std.toFixed(2)}
                         </td>
-                        <td data-label="Inference Mean &plusmn; Std" className="font-mono text-xs text-right text-[#9CA3AF]">
+                        <td data-label="Inference Mean &plusmn; Std" className="font-mono text-xs text-right text-[var(--text-secondary)]">
                           {metrics.current_mean.toFixed(2)} &plusmn; {metrics.current_std.toFixed(2)}
                         </td>
                       </tr>

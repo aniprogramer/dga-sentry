@@ -18,7 +18,7 @@ export default function QuickTestResults({
       <div className="soc-quick-test-panel loading">
         <div className="soc-quick-loading-row">
           <span className="soc-spinner" />
-          <span className="font-mono text-xs text-[#9CA3AF]">
+          <span className="font-mono text-xs text-[var(--text-secondary)]">
             EXECUTING VECTORIZED BATCH TEST (PREDICT_BATCH)...
           </span>
         </div>

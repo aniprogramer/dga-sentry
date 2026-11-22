@@ -25,24 +25,24 @@ export default function BrandMark({
     >
       <polygon
         points="32.00,3.50 7.32,17.75 7.32,46.25 32.00,60.50 56.68,46.25 56.68,17.75"
-        fill="#11141A"
-        stroke="#10B981"
+        fill="var(--surface-card)"
+        stroke="var(--color-safe)"
         strokeWidth="3"
         strokeLinejoin="miter"
       />
-      <path d="M32 32 L32.00 15.00" stroke="#10B981" strokeOpacity="0.55" strokeWidth="1.8" />
-      <path d="M32 32 L17.28 23.50" stroke="#10B981" strokeOpacity="0.55" strokeWidth="1.8" />
-      <path d="M32 32 L17.28 40.50" stroke="#10B981" strokeOpacity="0.55" strokeWidth="1.8" />
-      <path d="M32 32 L32.00 49.00" stroke="#10B981" strokeOpacity="0.55" strokeWidth="1.8" />
-      <path d="M32 32 L46.72 40.50" stroke="#10B981" strokeOpacity="0.55" strokeWidth="1.8" />
-      <path d="M32 32 L46.72 23.50" stroke="#10B981" strokeOpacity="0.55" strokeWidth="1.8" />
-      <rect x="29.00" y="12.00" width="6.00" height="6.00" fill="#10B981" />
-      <rect x="14.28" y="20.50" width="6.00" height="6.00" fill="#10B981" />
-      <rect x="14.28" y="37.50" width="6.00" height="6.00" fill="#10B981" />
-      <rect x="29.00" y="46.00" width="6.00" height="6.00" fill="#F43F5E" />
-      <rect x="43.72" y="37.50" width="6.00" height="6.00" fill="#10B981" />
-      <rect x="43.72" y="20.50" width="6.00" height="6.00" fill="#10B981" />
-      <rect x="27.00" y="27.00" width="10.00" height="10.00" fill="#10B981" />
+      <path d="M32 32 L32.00 15.00" stroke="var(--color-safe)" strokeOpacity="0.55" strokeWidth="1.8" />
+      <path d="M32 32 L17.28 23.50" stroke="var(--color-safe)" strokeOpacity="0.55" strokeWidth="1.8" />
+      <path d="M32 32 L17.28 40.50" stroke="var(--color-safe)" strokeOpacity="0.55" strokeWidth="1.8" />
+      <path d="M32 32 L32.00 49.00" stroke="var(--color-safe)" strokeOpacity="0.55" strokeWidth="1.8" />
+      <path d="M32 32 L46.72 40.50" stroke="var(--color-safe)" strokeOpacity="0.55" strokeWidth="1.8" />
+      <path d="M32 32 L46.72 23.50" stroke="var(--color-safe)" strokeOpacity="0.55" strokeWidth="1.8" />
+      <rect x="29.00" y="12.00" width="6.00" height="6.00" fill="var(--color-safe)" />
+      <rect x="14.28" y="20.50" width="6.00" height="6.00" fill="var(--color-safe)" />
+      <rect x="14.28" y="37.50" width="6.00" height="6.00" fill="var(--color-safe)" />
+      <rect x="29.00" y="46.00" width="6.00" height="6.00" fill="var(--color-malicious)" />
+      <rect x="43.72" y="37.50" width="6.00" height="6.00" fill="var(--color-safe)" />
+      <rect x="43.72" y="20.50" width="6.00" height="6.00" fill="var(--color-safe)" />
+      <rect x="27.00" y="27.00" width="10.00" height="10.00" fill="var(--color-safe)" />
     </svg>
   );
 }
