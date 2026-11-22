@@ -20,10 +20,28 @@ import {
 import "./App.css";
 
 type TabMode = "workbench" | "bulk" | "metrics";
+type ThemeMode = "system" | "light" | "dark";
 type HistoryEntry = PredictionResult & { timestamp: string };
+
+function getInitialTheme(): ThemeMode {
+  if (typeof window === "undefined") return "system";
+  const stored = localStorage.getItem("dga-theme");
+  if (stored === "light" || stored === "dark" || stored === "system") {
+    return stored;
+  }
+  return "system";
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabMode>("workbench");
+  const [theme, setTheme] = useState<ThemeMode>(getInitialTheme);
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "dark";
+    const stored = localStorage.getItem("dga-theme");
+    if (stored === "light") return "light";
+    if (stored === "dark") return "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   const [currentResult, setCurrentResult] = useState<PredictionResult | null>(null);
   const [batchResults, setBatchResults] = useState<PredictionResult[]>([]);
   const [testResults, setTestResults] = useState<PredictionResult[] | null>(null);
@@ -51,6 +69,45 @@ function App() {
       }
     };
     checkBackend();
+  }, []);
+
+  // Synchronize theme with DOM and system preferences
+  useEffect(() => {
+    const updateTheme = () => {
+      let effective: "light" | "dark" = "dark";
+      if (theme === "system") {
+        effective = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      } else {
+        effective = theme;
+      }
+      setResolvedTheme(effective);
+      if (effective === "light") {
+        document.documentElement.setAttribute("data-theme", "light");
+      } else {
+        document.documentElement.removeAttribute("data-theme");
+      }
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        metaTheme.setAttribute("content", effective === "light" ? "#F1F5F9" : "#090B0E");
+      }
+    };
+
+    updateTheme();
+
+    if (theme === "system") {
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      const listener = () => updateTheme();
+      media.addEventListener("change", listener);
+      return () => media.removeEventListener("change", listener);
+    }
+  }, [theme]);
+
+  const cycleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next: ThemeMode = prev === "dark" ? "light" : prev === "light" ? "system" : "dark";
+      localStorage.setItem("dga-theme", next);
+      return next;
+    });
   }, []);
 
   const addToHistory = useCallback((results: PredictionResult[]) => {
@@ -204,8 +261,45 @@ function App() {
             </button>
           </nav>
 
-          {/* Right: Engine Status Pills */}
+          {/* Right: Engine Status Pills & Theme Switcher */}
           <div className="soc-header-telemetry">
+            <button
+              type="button"
+              className="soc-theme-toggle"
+              onClick={cycleTheme}
+              aria-label={`Current theme: ${theme}. Click to switch theme`}
+              title={`Current theme: ${theme.toUpperCase()} (click to cycle)`}
+            >
+              <span className="soc-theme-icon" aria-hidden="true">
+                {theme === "light" ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2" />
+                    <path d="M12 20v2" />
+                    <path d="m4.93 4.93 1.41 1.41" />
+                    <path d="m17.66 17.66 1.41 1.41" />
+                    <path d="M2 12h2" />
+                    <path d="M20 12h2" />
+                    <path d="m6.34 17.66-1.41 1.41" />
+                    <path d="m19.07 4.93-1.41 1.41" />
+                  </svg>
+                ) : theme === "dark" ? (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                  </svg>
+                ) : (
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="20" height="14" x="2" y="3" rx="2" />
+                    <line x1="8" x2="16" y1="21" y2="21" />
+                    <line x1="12" x2="12" y1="17" y2="21" />
+                  </svg>
+                )}
+              </span>
+              <span className="soc-theme-label font-mono">
+                {theme === "system" ? "AUTO" : theme.toUpperCase()}
+              </span>
+            </button>
+
             <button
               type="button"
               className="soc-status-pill"
@@ -244,7 +338,7 @@ function App() {
                 </div>
                 <div className="soc-popover-item">
                   <span className="soc-popover-label">PREDICTION CACHE</span>
-                  <span className="soc-popover-val font-mono text-emerald-400">ACTIVE</span>
+                  <span className="soc-popover-val font-mono text-[var(--text-safe)]">ACTIVE</span>
                 </div>
               </div>
             )}
@@ -265,7 +359,7 @@ function App() {
 
           <div className="soc-rail-item">
             <span className="soc-rail-label">ROC-AUC SCORE</span>
-            <span className="soc-rail-value font-mono text-sky-400">
+            <span className="soc-rail-value font-mono text-[var(--text-active)]">
               {modelInfo?.metrics ? modelInfo.metrics.roc_auc.toFixed(4) : "0.9454"}
             </span>
           </div>
@@ -273,7 +367,7 @@ function App() {
 
           <div className="soc-rail-item">
             <span className="soc-rail-label">VALIDATION ACC</span>
-            <span className="soc-rail-value font-mono text-emerald-400">
+            <span className="soc-rail-value font-mono text-[var(--text-safe)]">
               {modelInfo?.metrics ? `${(modelInfo.metrics.accuracy * 100).toFixed(1)}%` : "88.3%"}
             </span>
           </div>
@@ -281,7 +375,7 @@ function App() {
 
           <div className="soc-rail-item">
             <span className="soc-rail-label">OPERATING FPR</span>
-            <span className="soc-rail-value font-mono text-amber-400">&lt; 0.5% (p &ge; 0.75)</span>
+            <span className="soc-rail-value font-mono text-[var(--text-amber)]">&lt; 0.5% (p &ge; 0.75)</span>
           </div>
           <div className="soc-rail-divider" />
 
@@ -293,7 +387,7 @@ function App() {
 
           <div className={`soc-rail-item ${showAllStats ? "mobile-show" : "mobile-hidden"}`}>
             <span className="soc-rail-label">EXPLAINABILITY</span>
-            <span className="soc-rail-value font-mono text-[#9CA3AF]">TreeSHAP v0.44</span>
+            <span className="soc-rail-value font-mono text-[var(--text-secondary)]">TreeSHAP v0.44</span>
           </div>
 
           <button
@@ -358,6 +452,7 @@ function App() {
                     <ConfidenceChart
                       features={currentResult.features}
                       label={currentResult.label}
+                      themeKey={resolvedTheme}
                     />
                   </div>
                 )}
@@ -392,7 +487,7 @@ function App() {
                               style={{ width: `${Math.round(result.malicious_probability * 100)}%` }}
                             />
                           </div>
-                          <span className="font-mono text-xs text-[#9CA3AF]">
+                          <span className="font-mono text-xs text-[var(--text-secondary)]">
                             {(result.malicious_probability * 100).toFixed(1)}%
                           </span>
                         </div>
@@ -425,20 +520,57 @@ function App() {
         )}
       </main>
 
-      {/* 4. Industrial Footer */}
+      {/* 4. Industrial SOC Console Footer */}
       <footer className="soc-footer">
         <div className="soc-footer-inner">
-          <div className="soc-footer-left">
-            <span>DGA Domain Intelligence Engine</span>
-            <span className="soc-dot-sep">·</span>
-            <span>XGBoost &amp; Random Forest Classifiers</span>
-            <span className="soc-dot-sep">·</span>
-            <span>TreeSHAP Attribution (Polynomial Time)</span>
-            <span className="soc-dot-sep">·</span>
-            <span>Continuous KS Drift Detection</span>
+          {/* Upper Deck: Identity & Technical Spec Grid */}
+          <div className="soc-footer-top">
+            <div className="soc-footer-brand">
+              <div className="soc-footer-brand-header">
+                <BrandMark className="soc-footer-mark" size={20} />
+                <span className="soc-footer-title">DGA SENTRY</span>
+                <span className="soc-footer-version">v2.1-PROD</span>
+              </div>
+              <p className="soc-footer-desc">
+                Autonomous Algorithmic Domain Detection &amp; Botnet C2 Mitigation Engine. Real-time inference with polynomial TreeSHAP attribution and continuous feature drift detection.
+              </p>
+            </div>
+
+            <div className="soc-footer-chips">
+              <div className="soc-footer-chip">
+                <span className="chip-key">CLASSIFIER</span>
+                <span className="chip-val font-mono">XGBoost &amp; Random Forest</span>
+              </div>
+              <div className="soc-footer-chip">
+                <span className="chip-key">ATTRIBUTION</span>
+                <span className="chip-val font-mono">TreeSHAP (Polynomial)</span>
+              </div>
+              <div className="soc-footer-chip">
+                <span className="chip-key">DRIFT MONITOR</span>
+                <span className="chip-val font-mono">Continuous KS 2-Sample</span>
+              </div>
+              <div className="soc-footer-chip">
+                <span className="chip-key">DNS TELEMETRY</span>
+                <span className="chip-val font-mono">RFC 1035 / 5891 IDN</span>
+              </div>
+            </div>
           </div>
-          <div className="soc-footer-right font-mono text-xs text-[#64748B]">
-            RFC 1035 / 5891 IDN Compliant · FANCI Architecture (Schüppen et al., 2018)
+
+          <div className="soc-footer-divider" />
+
+          {/* Lower Deck: Architecture Attribution & Security Posture */}
+          <div className="soc-footer-bottom">
+            <div className="soc-footer-meta">
+              <span>FANCI Architecture (Schüppen et al., 2018)</span>
+              <span className="soc-dot-sep">·</span>
+              <span>13-Dimensional Linguistic Tensor</span>
+              <span className="soc-dot-sep">·</span>
+              <span>Zero-Telemetry Local Processing</span>
+            </div>
+            <div className="soc-footer-posture font-mono">
+              <span className="soc-status-pip" aria-hidden="true" />
+              <span>SYSTEM NOMINAL · SECURE SOC CONSOLE</span>
+            </div>
           </div>
         </div>
       </footer>
