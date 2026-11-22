@@ -5114,3 +5114,33 @@ body,
 .soc-batch-status li[data-status="duplicate"] { color: var(--color-suspicious); }
 .soc-batch-status li[data-status="valid"] { color: var(--color-safe); }
 .soc-batch-status li[data-status="normalized"] { color: var(--color-active); }
+
+/* About page */
+.soc-about { max-width: 760px; margin: 0 auto; padding: 0.5rem 0 3rem; color: var(--text-secondary); line-height: 1.7; font-size: 0.9375rem; }
+.soc-about h1, .soc-about h2 { color: var(--text-primary); line-height: 1.25; }
+.soc-about h1 { font-size: 1.75rem; font-weight: 700; margin: 1rem 0 0.75rem; outline: none; }
+.soc-about h2 { font-size: 1.125rem; font-weight: 600; margin: 0 0 0.75rem; }
+.soc-about section { padding: 1.5rem 0; border-top: 1px solid var(--border-hairline); scroll-margin-top: 5rem; }
+.soc-about-hero { padding: 1rem 0 1.5rem; }
+.soc-about-hero p { font-size: 1.0625rem; margin: 0; }
+.soc-about-toc { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-bottom: 1.25rem; }
+.soc-about-toc a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.75rem; border: 1px solid var(--border-hairline); border-radius: 4px; font-family: "JetBrains Mono", monospace; font-size: 0.75rem; }
+.soc-about a { color: var(--text-active); text-underline-offset: 3px; }
+.soc-about a:focus-visible, .soc-help-link a:focus-visible, .soc-footer-link:focus-visible { outline: 2px solid var(--text-active); outline-offset: 2px; }
+.soc-about ol, .soc-about ul { margin: 0 0 0.75rem; padding-left: 1.25rem; }
+.soc-about li { margin-bottom: 0.5rem; }
+.soc-about li strong, .soc-about dt { color: var(--text-primary); }
+.soc-about dt { font-family: "JetBrains Mono", monospace; font-size: 0.8125rem; margin-top: 0.75rem; }
+.soc-about dd { margin: 0.125rem 0 0; }
+.soc-about-cta { padding-top: 1.5rem; border-top: 1px solid var(--border-hairline); }
+.soc-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.soc-help-link { margin: 0.5rem 0 0; font-size: 0.8125rem; }
+.soc-help-link a, .soc-footer-link { color: var(--text-secondary); text-underline-offset: 3px; }
+.soc-help-link a:hover, .soc-footer-link:hover { color: var(--text-primary); }
+@media (max-width: 480px) { .soc-about h1 { font-size: 1.5rem; } }
+
+/* Four nav items: use short labels where the header is too narrow for full ones */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .soc-tab-label-full { display: none; }
+  .soc-tab-label-short { display: inline; }
+}
