@@ -414,6 +414,7 @@ def extract_features(domain: str, ngram_model: dict | None = None) -> dict:
     """
     # Strip TLD to get the second-level domain (decoding IDN if needed)
     sld = strip_tld(domain) if "." in domain else decode_idn(domain.strip().rstrip("."))
+    sld = sld or domain.strip(".").lower()  # guard: never score an empty string
 
     # Load n-gram model if not provided
     if ngram_model is None:

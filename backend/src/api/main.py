@@ -32,7 +32,7 @@ import numpy as np
 from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 
@@ -41,6 +41,12 @@ from backend.src.features import (
     load_ngram_model,
     sanitize_and_validate_domain,
     FEATURE_NAMES,
+)
+from backend.src.domain_validation import (
+    DomainError,
+    DomainInfo,
+    normalize_and_validate,
+    safe_input,
 )
 from backend.src.api.cache import PredictionCache
 from backend.src.api.dns_resolver import (
@@ -248,26 +254,18 @@ async def lifespan(app: FastAPI):
 
 # --- Pydantic Models ---
 
-class DomainRequest(BaseModel):
-    """Request model for single domain prediction."""
-    domain: str = Field(..., description="Domain name to check")
+MAX_BATCH_SIZE = 100
+MAX_BODY_BYTES = 64 * 1024
 
-    @field_validator("domain")
-    @classmethod
-    def validate_domain(cls, v: str) -> str:
-        return validate_hostname(v)
+
+class DomainRequest(BaseModel):
+    """Request model for single domain prediction. Validated in the endpoint (see domain_validation)."""
+    domain: str = Field(..., description="Domain name to check")
 
 
 class BatchDomainRequest(BaseModel):
-    """Request model for batch domain prediction."""
-    domains: list[str] = Field(..., min_length=1, max_length=100, description="List of domain names")
-
-    @field_validator("domains")
-    @classmethod
-    def validate_domains(cls, v: list[str]) -> list[str]:
-        if not v:
-            raise ValueError("Domain list cannot be empty")
-        return [validate_hostname(d) for d in v]
+    """Request model for batch domain prediction. Items are validated independently in the endpoint."""
+    domains: list[str] = Field(..., description="List of domain names (max 100)")
 
 
 class RiskFactor(BaseModel):
@@ -316,6 +314,14 @@ class PredictionResult(BaseModel):
         description="Live external DNS resolution and operational threat telemetry (when resolve_dns=True)",
     )
     features: dict[str, float]
+    # Additive input-handling fields
+    original: str | None = None
+    ascii: str | None = None
+    registrable_domain: str | None = None
+    subdomain_depth: int | None = None
+    is_punycode: bool | None = None
+    warnings: list[str] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
 
 
 class SinglePredictionResponse(BaseModel):
@@ -323,10 +329,26 @@ class SinglePredictionResponse(BaseModel):
     prediction: PredictionResult
 
 
+class DomainErrorBody(BaseModel):
+    code: str
+    message: str
+    input: str
+
+
+class BatchItemResult(BaseModel):
+    input: str
+    status: str  # "ok" or "error"
+    prediction: PredictionResult | None = None
+    error: DomainErrorBody | None = None
+    duplicate_of: str | None = None
+
+
 class BatchPredictionResponse(BaseModel):
     """Response for batch domain prediction."""
     predictions: list[PredictionResult]
     total: int
+    results: list[BatchItemResult] = Field(default_factory=list)
+    duplicates_removed: int = 0
 
 
 class HealthResponse(BaseModel):
@@ -439,6 +461,85 @@ app.add_middleware(
     allow_methods=ALLOWED_METHODS,
     allow_headers=ALLOWED_HEADERS,
 )
+
+
+class BodySizeLimitMiddleware:
+    """ASGI guard: reject request bodies over MAX_BODY_BYTES with 413 (also for chunked uploads)."""
+
+    def __init__(self, app, max_bytes: int = MAX_BODY_BYTES):
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        too_big = JSONResponse(
+            status_code=413,
+            content={"code": "PAYLOAD_TOO_LARGE", "message": "Request body is too large.", "input": ""},
+        )
+        declared = dict(scope["headers"]).get(b"content-length")
+        if declared and declared.isdigit() and int(declared) > self.max_bytes:
+            return await too_big(scope, receive, send)
+
+        received = 0
+        exceeded = False
+
+        async def limited_receive():
+            nonlocal received, exceeded
+            message = await receive()
+            if message["type"] == "http.request":
+                received += len(message.get("body", b""))
+                if received > self.max_bytes:
+                    exceeded = True
+                    return {"type": "http.request", "body": b"", "more_body": False}
+            return message
+
+        started = False
+
+        async def guarded_send(message):
+            nonlocal started
+            if exceeded and not started:
+                return
+            if message["type"] == "http.response.start":
+                started = True
+            await send(message)
+
+        await self.app(scope, limited_receive, guarded_send)
+        if exceeded and not started:
+            await too_big(scope, receive, send)
+
+
+app.add_middleware(BodySizeLimitMiddleware)
+
+
+@app.exception_handler(DomainError)
+async def domain_error_handler(request: Request, exc: DomainError) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content={"code": exc.code, "message": exc.message, "input": getattr(exc, "input", "")},
+    )
+
+
+def _check_domain(raw: str) -> DomainInfo:
+    """Normalize and validate; on failure attach a safely escaped copy of the input."""
+    try:
+        return normalize_and_validate(raw)
+    except DomainError as e:
+        e.input = safe_input(raw)
+        logger.debug("Rejected domain input: code=%s", e.code)
+        raise
+
+
+def _annotate(result: PredictionResult, info: DomainInfo) -> PredictionResult:
+    return result.model_copy(update={
+        "original": info.original,
+        "ascii": info.ascii,
+        "registrable_domain": info.registrable_domain,
+        "subdomain_depth": info.subdomain_depth,
+        "is_punycode": info.is_punycode,
+        "warnings": list(info.warnings),
+        "notes": list(info.notes),
+    })
 
 
 def _compute_shap_values(X_scaled: np.ndarray) -> np.ndarray | None:
@@ -850,10 +951,11 @@ def predict_single(
     if _model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
-    result = _predict_domain(domain_req.domain)
+    info = _check_domain(domain_req.domain)
+    result = _predict_domain(info.display)
     if resolve_dns:
         result = _enrich_result_with_dns(result)
-    return SinglePredictionResponse(prediction=result)
+    return SinglePredictionResponse(prediction=_annotate(result, info))
 
 
 @app.post("/predict/batch", response_model=BatchPredictionResponse, tags=["Prediction"])
@@ -876,10 +978,49 @@ def predict_batch(
     if _model is None:
         raise HTTPException(status_code=503, detail="Model not loaded")
 
-    results = _predict_domains_batch(batch_req.domains)
-    if resolve_dns:
+    raw_items = batch_req.domains
+    if not raw_items:
+        raise DomainError("EMPTY_BATCH")
+    if len(raw_items) > MAX_BATCH_SIZE:
+        raise DomainError("TOO_MANY_DOMAINS")
+
+    # Validate each item independently; de-duplicate on the normalized ASCII form.
+    items: list[BatchItemResult] = []
+    infos: dict[str, DomainInfo] = {}
+    order: list[str] = []
+    duplicates = 0
+    for raw in raw_items:
+        try:
+            info = _check_domain(raw)
+        except DomainError as e:
+            items.append(BatchItemResult(
+                input=safe_input(raw), status="error",
+                error=DomainErrorBody(code=e.code, message=e.message, input=e.input),
+            ))
+            continue
+        if info.ascii in infos:
+            duplicates += 1
+            items.append(BatchItemResult(
+                input=safe_input(raw), status="error", duplicate_of=info.ascii,
+                error=DomainErrorBody(code="DUPLICATE", message="Duplicate of an earlier entry.", input=safe_input(raw)),
+            ))
+            continue
+        infos[info.ascii] = info
+        order.append(info.ascii)
+        items.append(BatchItemResult(input=safe_input(raw), status="ok", duplicate_of=info.ascii))
+
+    results = _predict_domains_batch([infos[a].display for a in order]) if order else []
+    if resolve_dns and results:
         results = _enrich_results_batch_with_dns(results)
-    return BatchPredictionResponse(predictions=results, total=len(results))
+    results = [_annotate(r, infos[a]) for r, a in zip(results, order)]
+    by_ascii = dict(zip(order, results))
+    for it in items:
+        if it.status == "ok":
+            it.prediction = by_ascii[it.duplicate_of]
+            it.duplicate_of = None
+    return BatchPredictionResponse(
+        predictions=results, total=len(results), results=items, duplicates_removed=duplicates,
+    )
 
 
 @app.get(

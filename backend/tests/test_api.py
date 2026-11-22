@@ -480,20 +480,26 @@ class TestHostnameSanitization:
         assert resp.status_code == 200
         assert resp.json()["prediction"]["domain"] == "müller.de"
 
+        # Underscore is now a warning, not an error (valid in real DNS records)
+        resp = client.post("/predict", json={"domain": "bad_domain.com"})
+        assert resp.status_code == 200
+        assert "UNDERSCORE" in resp.json()["prediction"]["warnings"]
+
         # RFC violations return 422
-        assert client.post("/predict", json={"domain": "bad_domain.com"}).status_code == 422
         assert client.post("/predict", json={"domain": "example.123"}).status_code == 422
         assert client.post("/predict", json={"domain": "foo..bar.com"}).status_code == 422
         assert client.post("/predict", json={"domain": "-bad.com"}).status_code == 422
         assert client.post("/predict", json={"domain": "xn--99999999999999999"}).status_code == 422
 
     def test_batch_predict_rfc_validation(self, client):
-        # Mixed batch with 1 invalid domain fails entirely with 422
+        # Mixed batch: valid items analyzed, invalid item carries its error
         resp = client.post(
             "/predict/batch",
-            json={"domains": ["google.com", "bad_domain.com", "facebook.com"]},
+            json={"domains": ["google.com", "bad..com", "facebook.com"]},
         )
-        assert resp.status_code == 422
+        assert resp.status_code == 200
+        assert resp.json()["total"] == 2
+        assert resp.json()["results"][1]["error"]["code"] == "EMPTY_LABEL"
 
         # Valid batch with Punycode and trailing dots succeeds with 200
         resp = client.post(
