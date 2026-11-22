@@ -1,4 +1,14 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
+import {
+  MAX_BATCH_SIZE,
+  MESSAGES,
+  NOTE_MESSAGES,
+  WARNING_MESSAGES,
+  normalizeAndValidate,
+  parseBatch,
+} from "../lib/domain";
+
+const DEBOUNCE_MS = 600;
 
 interface DomainInputProps {
   onSubmitSingle: (domain: string, resolveDns?: boolean) => void;
@@ -27,54 +37,55 @@ export default function DomainInput({
   const [batchText, setBatchText] = useState("");
   const [resolveDns, setResolveDns] = useState(false);
   const [error, setError] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const validateDomain = (d: string): boolean => {
-    const trimmed = d.trim();
-    if (!trimmed) {
-      setError("Please enter a domain name");
-      return false;
-    }
-    if (/\s/.test(trimmed)) {
-      setError("Domain cannot contain whitespace");
-      return false;
-    }
-    if (trimmed.length > 253) {
-      setError("Domain exceeds RFC limit (max 253 characters)");
-      return false;
-    }
-    setError("");
-    return true;
-  };
+  const trimmed = domain.trim();
+  const result = useMemo(() => (trimmed ? normalizeAndValidate(domain) : null), [domain, trimmed]);
+  const isInvalid = result !== null && !result.ok;
+  const batchLines = useMemo(() => parseBatch(batchText), [batchText]);
+  const batchValid = batchLines.filter((l) => l.status === "valid" || l.status === "normalized");
+  const batchTooMany = batchValid.length > MAX_BATCH_SIZE;
+
+  // Do not show errors on the first keystroke: wait for a pause (or blur/submit).
+  useEffect(() => {
+    if (!trimmed) return;
+    const t = setTimeout(() => setShowFeedback(true), DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [domain, trimmed]);
 
   const handleSingleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateDomain(domain)) {
-      onSubmitSingle(domain.trim().toLowerCase(), resolveDns);
+    if (!result) {
+      setShowFeedback(true);
+      return;
     }
+    if (!result.ok) {
+      setShowFeedback(true);
+      return;
+    }
+    setShowFeedback(false);
+    setDomain("");
+    onSubmitSingle(trimmed, resolveDns);
   };
 
   const handleBatchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const domains = batchText
-      .split("\n")
-      .map((d) => d.trim().toLowerCase())
-      .filter((d) => d.length > 0 && d.length <= 253 && !/\s/.test(d));
-
-    if (domains.length === 0) {
+    if (batchValid.length === 0) {
       setError("Please enter at least one valid domain");
       return;
     }
-    if (domains.length > 100) {
-      setError("Maximum 100 domains per batch");
+    if (batchTooMany) {
+      setError(MESSAGES.TOO_MANY_DOMAINS);
       return;
     }
     setError("");
-    onSubmitBatch(domains, resolveDns);
+    onSubmitBatch(batchValid.map((l) => l.raw), resolveDns);
   };
 
   const handleSelectSample = (sampleVal: string) => {
     setDomain(sampleVal);
+    setShowFeedback(false);
     setError("");
     if (inputRef.current) {
       inputRef.current.focus();
@@ -127,8 +138,11 @@ export default function DomainInput({
               value={domain}
               onChange={(e) => {
                 setDomain(e.target.value);
-                if (error) setError("");
+                setShowFeedback(false);
               }}
+              onBlur={() => trimmed && setShowFeedback(true)}
+              aria-invalid={showFeedback && isInvalid}
+              aria-describedby="domain-feedback"
               placeholder="Enter domain name, FQDN, or Punycode (e.g. google.com)"
               className="soc-terminal-input"
               disabled={isLoading}
@@ -138,7 +152,7 @@ export default function DomainInput({
             <button
               type="submit"
               className="soc-btn-primary"
-              disabled={isLoading || !domain.trim()}
+              disabled={isLoading || !trimmed || isInvalid}
               id="check-domain-btn"
             >
               {isLoading ? (
@@ -151,6 +165,29 @@ export default function DomainInput({
               )}
             </button>
           </div>
+          <div id="domain-feedback" className="soc-feedback" role="status" aria-live="polite">
+            {showFeedback && result && !result.ok && (
+              <span className="soc-feedback-error" data-code={result.code}>
+                {result.message}
+              </span>
+            )}
+            {showFeedback && result?.ok && (
+              <>
+                {result.info.notes.map((n) => (
+                  <span key={n} className="soc-feedback-note">
+                    {n === "EXTRACTED_FROM_URL"
+                      ? `Analyzing ${result.info.display} from the URL you pasted. `
+                      : `${NOTE_MESSAGES[n]} `}
+                  </span>
+                ))}
+                {result.info.warnings.map((w) => (
+                  <span key={w} className="soc-feedback-warning">
+                    {WARNING_MESSAGES[w]}{" "}
+                  </span>
+                ))}
+              </>
+            )}
+          </div>
         </form>
       ) : (
         /* Batch Mode Textarea */
@@ -162,20 +199,37 @@ export default function DomainInput({
               setBatchText(e.target.value);
               if (error) setError("");
             }}
+            aria-describedby="batch-status-list"
             placeholder={"Paste domains, one per line:\ngoogle.com\nxjkqwrtzp.info\namazon.com"}
             className="soc-terminal-textarea"
             disabled={isLoading}
             rows={5}
             spellCheck={false}
           />
+          {batchLines.length > 0 && (
+            <ul id="batch-status-list" className="soc-batch-status" aria-label="Batch input status">
+              {batchLines.map((l, i) => (
+                <li key={i} data-status={l.status}>
+                  <code>{l.raw}</code>{" "}
+                  {l.status === "valid" && <span>valid</span>}
+                  {l.status === "normalized" && <span>normalized to {l.ascii}</span>}
+                  {l.status === "invalid" && <span>invalid: {l.message}</span>}
+                  {l.status === "duplicate" && <span>duplicate removed</span>}
+                </li>
+              ))}
+            </ul>
+          )}
+          {batchTooMany && (
+            <div className="soc-feedback-error" role="alert">{MESSAGES.TOO_MANY_DOMAINS}</div>
+          )}
           <div className="soc-batch-footer">
             <span className="soc-batch-count">
-              {batchText.split("\n").filter((d) => d.trim()).length} domain(s) staged
+              {batchValid.length} valid of {batchLines.length} entered (max {MAX_BATCH_SIZE})
             </span>
             <button
               type="submit"
               className="soc-btn-primary"
-              disabled={isLoading || !batchText.trim()}
+              disabled={isLoading || batchValid.length === 0 || batchTooMany}
               id="batch-submit-btn"
             >
               {isLoading ? (
@@ -247,8 +301,24 @@ export default function DomainInput({
                 </>
               ) : (
                 <>
-                  <span className="soc-bolt-icon">⚡</span>
-                  <span>Run Test (Sample Batch)</span>
+                  <svg
+                    className="soc-test-icon"
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
+                    <path d="M8.5 2h7" />
+                    <path d="M7 16h10" />
+                  </svg>
+                  <span className="soc-btn-test-text">Run Test</span>
+                  <span className="soc-btn-test-badge">(Sample Batch)</span>
                 </>
               )}
             </button>

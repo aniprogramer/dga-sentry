@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import DomainInput from "./components/DomainInput";
 import PredictionResultCard from "./components/PredictionResult";
 import ConfidenceChart from "./components/ConfidenceChart";
@@ -40,7 +40,7 @@ function App() {
     const stored = localStorage.getItem("dga-theme");
     if (stored === "light") return "light";
     if (stored === "dark") return "dark";
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    return typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [currentResult, setCurrentResult] = useState<PredictionResult | null>(null);
   const [batchResults, setBatchResults] = useState<PredictionResult[]>([]);
@@ -53,6 +53,51 @@ function App() {
   const [backendStatus, setBackendStatus] = useState<"checking" | "online" | "offline">("checking");
   const [showAllStats, setShowAllStats] = useState(false);
   const [showStatusPopover, setShowStatusPopover] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const statusPopoverRef = useRef<HTMLDivElement>(null);
+  const statusButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!showStatusPopover) return;
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      const target = event.target as Node | null;
+      if (
+        statusPopoverRef.current &&
+        !statusPopoverRef.current.contains(target) &&
+        statusButtonRef.current &&
+        !statusButtonRef.current.contains(target)
+      ) {
+        setShowStatusPopover(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setShowStatusPopover(false);
+        statusButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside, { passive: true });
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showStatusPopover]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 8);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const domainSampler = useMemo(() => new TestDomainSampler(), []);
 
@@ -76,7 +121,11 @@ function App() {
     const updateTheme = () => {
       let effective: "light" | "dark" = "dark";
       if (theme === "system") {
-        effective = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        effective =
+          typeof window.matchMedia === "function" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
       } else {
         effective = theme;
       }
@@ -94,7 +143,7 @@ function App() {
 
     updateTheme();
 
-    if (theme === "system") {
+    if (theme === "system" && typeof window.matchMedia === "function") {
       const media = window.matchMedia("(prefers-color-scheme: dark)");
       const listener = () => updateTheme();
       media.addEventListener("change", listener);
@@ -205,7 +254,7 @@ function App() {
   return (
     <div className="soc-app">
       {/* 1. Unified Industrial Top Header Bar */}
-      <header className="soc-header">
+      <header className={`soc-header ${isScrolled ? "is-scrolled" : ""}`}>
         <div className="soc-header-inner">
           {/* Technical Brand & Console Identifier */}
           <div className="soc-brand" title="DGA Threat Intelligence Engine / SecOps Console">
@@ -301,6 +350,7 @@ function App() {
             </button>
 
             <button
+              ref={statusButtonRef}
               type="button"
               className="soc-status-pill"
               onClick={() => setShowStatusPopover((prev) => !prev)}
@@ -321,7 +371,12 @@ function App() {
             <span className="soc-telemetry-item font-mono">CACHE: ACTIVE</span>
 
             {showStatusPopover && (
-              <div className="soc-status-popover" role="dialog" aria-label="System Telemetry Details">
+              <div
+                ref={statusPopoverRef}
+                className="soc-status-popover"
+                role="dialog"
+                aria-label="System Telemetry Details"
+              >
                 <div className="soc-popover-item">
                   <span className="soc-popover-label">ENGINE STATUS</span>
                   <span className={`soc-popover-val ${backendStatus}`}>
@@ -404,9 +459,10 @@ function App() {
 
       {/* 3. Main Workspace Container */}
       <main className="soc-main-canvas">
-        {/* Tab 1: Investigation Workbench */}
-        {activeTab === "workbench" && (
-          <div className="soc-workbench-layout">
+        <div key={activeTab} className="soc-tab-content-enter">
+          {/* Tab 1: Investigation Workbench */}
+          {activeTab === "workbench" && (
+            <div className="soc-workbench-layout">
             {/* Input & Staging Console */}
             <section className="soc-workbench-top">
               <DomainInput
@@ -518,6 +574,7 @@ function App() {
             <ModelMetricsDrift />
           </div>
         )}
+        </div>
       </main>
 
       {/* 4. Industrial SOC Console Footer */}

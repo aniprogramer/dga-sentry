@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { PredictionResult } from "../api/client";
+import { useCountUp } from "../hooks/useCountUp";
 
 interface PredictionResultProps {
   result: PredictionResult | null;
@@ -43,6 +44,7 @@ export default function PredictionResultCard({
   isLoading,
 }: PredictionResultProps) {
   const [copied, setCopied] = useState(false);
+  const animatedProb = useCountUp(result ? result.malicious_probability * 100 : 0, 500, 1);
 
   if (isLoading) {
     return (
@@ -60,11 +62,10 @@ export default function PredictionResultCard({
 
   if (!result) return null;
 
-  const isMalicious = result.risk_tier === "malicious" || result.label === "malicious";
-  const isSuspicious = result.risk_tier === "suspicious";
+  const isMalicious = result ? (result.risk_tier === "malicious" || result.label === "malicious") : false;
+  const isSuspicious = result ? result.risk_tier === "suspicious" : false;
   const tier = isMalicious ? "malicious" : isSuspicious ? "suspicious" : "safe";
 
-  const probPercent = (result.malicious_probability * 100).toFixed(1);
   const actionText = isMalicious
     ? "BLOCK / MALICIOUS"
     : isSuspicious
@@ -101,7 +102,7 @@ export default function PredictionResultCard({
   }
 
   return (
-    <div className={`soc-triage-card tier-${tier}`}>
+    <div className={`soc-triage-card tier-${tier} soc-card-reveal`}>
       {/* 1. Incident Triage Verdict Header */}
       <div className="soc-triage-header">
         <div className="soc-header-left">
@@ -120,7 +121,7 @@ export default function PredictionResultCard({
         </div>
 
         <div className="soc-header-right">
-          <div className={`soc-verdict-badge badge-${tier}`}>
+          <div className={`soc-verdict-badge badge-${tier} soc-verdict-flash`}>
             <span className="soc-badge-icon">
               {isMalicious ? "☒" : isSuspicious ? "⚠" : "☑"}
             </span>
@@ -135,8 +136,8 @@ export default function PredictionResultCard({
         <div className="soc-metric-box">
           <span className="soc-metric-label">MALICIOUS PROBABILITY</span>
           <div className="soc-metric-row">
-            <span className={`soc-metric-value text-${tier}`}>
-              {probPercent}%
+            <span className={`soc-metric-value text-${tier} tabular-nums font-mono`}>
+              {animatedProb}%
             </span>
             <span className="soc-metric-badge">
               Calibrated FPR &lt;0.5%

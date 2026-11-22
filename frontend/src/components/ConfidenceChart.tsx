@@ -146,7 +146,13 @@ export default function ConfidenceChart({
               width={85}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="value" radius={[0, 4, 4, 0]} animationDuration={800}>
+            <Bar
+              dataKey="value"
+              radius={[0, 4, 4, 0]}
+              isAnimationActive={typeof window !== "undefined" ? !window.matchMedia("(prefers-reduced-motion: reduce)").matches : true}
+              animationDuration={600}
+              animationEasing="ease-out"
+            >
               {data.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
