@@ -1,0 +1,341 @@
+[
+ {
+  "input": "google.com",
+  "code": null,
+  "ascii": "google.com",
+  "display": "google.com",
+  "notes": [],
+  "warnings": []
+ },
+ {
+  "input": "  Google.COM  ",
+  "code": null,
+  "ascii": "google.com",
+  "display": "google.com",
+  "notes": [
+   "NORMALIZED"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "example.org.",
+  "code": null,
+  "ascii": "example.org",
+  "display": "example.org",
+  "notes": [
+   "NORMALIZED",
+   "RESERVED_NAME"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "https://user:pw@evil.example.net:8443/p?q=1#f",
+  "code": null,
+  "ascii": "evil.example.net",
+  "display": "evil.example.net",
+  "notes": [
+   "EXTRACTED_FROM_URL",
+   "RESERVED_NAME"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "http://sub.mysite.io/path",
+  "code": null,
+  "ascii": "sub.mysite.io",
+  "display": "sub.mysite.io",
+  "notes": [
+   "EXTRACTED_FROM_URL"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "mysite.com:8080",
+  "code": null,
+  "ascii": "mysite.com",
+  "display": "mysite.com",
+  "notes": [
+   "EXTRACTED_FROM_URL"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "*.mysite.com",
+  "code": null,
+  "ascii": "mysite.com",
+  "display": "mysite.com",
+  "notes": [
+   "WILDCARD_STRIPPED"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "_dmarc.mysite.com",
+  "code": null,
+  "ascii": "_dmarc.mysite.com",
+  "display": "_dmarc.mysite.com",
+  "notes": [],
+  "warnings": [
+   "UNDERSCORE"
+  ]
+ },
+ {
+  "input": "xn--mller-kva.de",
+  "code": null,
+  "ascii": "xn--mller-kva.de",
+  "display": "müller.de",
+  "notes": [],
+  "warnings": []
+ },
+ {
+  "input": "müller.de",
+  "code": null,
+  "ascii": "xn--mller-kva.de",
+  "display": "müller.de",
+  "notes": [
+   "NORMALIZED"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "faß.de",
+  "code": null,
+  "ascii": "xn--fa-hia.de",
+  "display": "faß.de",
+  "notes": [
+   "NORMALIZED"
+  ],
+  "warnings": [
+   "VERY_SHORT"
+  ]
+ },
+ {
+  "input": "раураl.com",
+  "code": null,
+  "ascii": "xn--l-7sba6dbr.com",
+  "display": "раураl.com",
+  "notes": [
+   "NORMALIZED"
+  ],
+  "warnings": [
+   "HOMOGRAPH"
+  ]
+ },
+ {
+  "input": "foo.co.uk",
+  "code": null,
+  "ascii": "foo.co.uk",
+  "display": "foo.co.uk",
+  "notes": [],
+  "warnings": [
+   "VERY_SHORT"
+  ]
+ },
+ {
+  "input": "x.github.io",
+  "code": null,
+  "ascii": "x.github.io",
+  "display": "x.github.io",
+  "notes": [],
+  "warnings": [
+   "VERY_SHORT",
+   "PRIVATE_SUFFIX"
+  ]
+ },
+ {
+  "input": "123456.com",
+  "code": null,
+  "ascii": "123456.com",
+  "display": "123456.com",
+  "notes": [],
+  "warnings": [
+   "DIGIT_HEAVY"
+  ]
+ },
+ {
+  "input": "t.co",
+  "code": null,
+  "ascii": "t.co",
+  "display": "t.co",
+  "notes": [],
+  "warnings": [
+   "VERY_SHORT"
+  ]
+ },
+ {
+  "input": "a.test",
+  "code": null,
+  "ascii": "a.test",
+  "display": "a.test",
+  "notes": [
+   "RESERVED_NAME"
+  ],
+  "warnings": [
+   "VERY_SHORT"
+  ]
+ },
+ {
+  "input": "mysite.internal",
+  "code": null,
+  "ascii": "mysite.internal",
+  "display": "mysite.internal",
+  "notes": [
+   "RESERVED_NAME"
+  ],
+  "warnings": []
+ },
+ {
+  "input": "a.b.c.d.mysite.com",
+  "code": null,
+  "ascii": "a.b.c.d.mysite.com",
+  "display": "a.b.c.d.mysite.com",
+  "notes": [],
+  "warnings": [
+   "DEEP_SUBDOMAINS"
+  ]
+ },
+ {
+  "input": "lllllllllllllllllllllllllllllll.mysite.com",
+  "code": null,
+  "ascii": "lllllllllllllllllllllllllllllll.mysite.com",
+  "display": "lllllllllllllllllllllllllllllll.mysite.com",
+  "notes": [],
+  "warnings": [
+   "LONG_LABEL"
+  ]
+ },
+ {
+  "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com",
+  "code": null,
+  "ascii": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com",
+  "display": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com",
+  "notes": [],
+  "warnings": []
+ },
+ {
+  "input": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "code": null,
+  "ascii": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "display": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "notes": [],
+  "warnings": [
+   "LONG_LABEL"
+  ]
+ },
+ {
+  "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com",
+  "code": "LABEL_TOO_LONG"
+ },
+ {
+  "input": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "code": "TOO_LONG"
+ },
+ {
+  "input": "",
+  "code": "EMPTY"
+ },
+ {
+  "input": "   ",
+  "code": "EMPTY"
+ },
+ {
+  "input": "a..com",
+  "code": "EMPTY_LABEL"
+ },
+ {
+  "input": ".com",
+  "code": "EMPTY_LABEL"
+ },
+ {
+  "input": "a b.com",
+  "code": "INVALID_CHARACTER"
+ },
+ {
+  "input": "a\u0000b.com",
+  "code": "INVALID_CHARACTER"
+ },
+ {
+  "input": "a\tb.com",
+  "code": "INVALID_CHARACTER"
+ },
+ {
+  "input": "a$b.com",
+  "code": "INVALID_CHARACTER"
+ },
+ {
+  "input": "😀.com",
+  "code": "INVALID_CHARACTER"
+ },
+ {
+  "input": "a*b.com",
+  "code": "INVALID_CHARACTER"
+ },
+ {
+  "input": "-a.com",
+  "code": "HYPHEN_POSITION"
+ },
+ {
+  "input": "a-.com",
+  "code": "HYPHEN_POSITION"
+ },
+ {
+  "input": "ab--cd.com",
+  "code": "INVALID_PUNYCODE"
+ },
+ {
+  "input": "xn--99999999999999999.com",
+  "code": "INVALID_PUNYCODE"
+ },
+ {
+  "input": "127.0.0.1",
+  "code": "IS_IP_ADDRESS"
+ },
+ {
+  "input": "0x7f000001",
+  "code": "IS_IP_ADDRESS"
+ },
+ {
+  "input": "2130706433",
+  "code": "IS_IP_ADDRESS"
+ },
+ {
+  "input": "[::1]",
+  "code": "IS_IP_ADDRESS"
+ },
+ {
+  "input": "2001:db8::1",
+  "code": "IS_IP_ADDRESS"
+ },
+ {
+  "input": "http://[2001:db8::1]:80/x",
+  "code": "IS_IP_ADDRESS"
+ },
+ {
+  "input": "http://127.0.0.1:8080/",
+  "code": "IS_IP_ADDRESS"
+ },
+ {
+  "input": "example.123",
+  "code": "INVALID_TLD"
+ },
+ {
+  "input": "1.2.3.4.5",
+  "code": "INVALID_TLD"
+ },
+ {
+  "input": "localhost",
+  "code": "SINGLE_LABEL"
+ },
+ {
+  "input": "intranet",
+  "code": "SINGLE_LABEL"
+ },
+ {
+  "input": "a@b.com",
+  "code": "EMAIL_ADDRESS"
+ },
+ {
+  "input": "https://",
+  "code": "EMPTY"
+ }
+]
