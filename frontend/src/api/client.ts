@@ -5,6 +5,8 @@
  * defaulting to http://localhost:8000 for local development.
  */
 
+import { MESSAGES } from "../lib/domain";
+
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 // --- Response Types ---
@@ -53,15 +55,31 @@ export interface PredictionResult {
   top_risk_factors?: RiskFactor[] | null;
   dns_enrichment?: DnsEnrichmentResult | null;
   features: PredictionFeatures;
+  original?: string | null;
+  ascii?: string | null;
+  registrable_domain?: string | null;
+  subdomain_depth?: number | null;
+  is_punycode?: boolean | null;
+  warnings?: string[];
+  notes?: string[];
 }
 
 export interface SinglePredictionResponse {
   prediction: PredictionResult;
 }
 
+export interface BatchItemResult {
+  input: string;
+  status: "ok" | "error";
+  prediction?: PredictionResult | null;
+  error?: { code: string; message: string; input: string } | null;
+}
+
 export interface BatchPredictionResponse {
   predictions: PredictionResult[];
   total: number;
+  results?: BatchItemResult[];
+  duplicates_removed?: number;
 }
 
 export interface HealthResponse {
@@ -93,12 +111,15 @@ export interface ModelInfoResponse {
 export class ApiError extends Error {
   statusCode: number;
   retryAfter?: number;
+  /** Stable domain-validation code from the server (e.g. "EMPTY_LABEL"), if any. */
+  code?: string;
 
-  constructor(statusCode: number, message: string, retryAfter?: number) {
+  constructor(statusCode: number, message: string, retryAfter?: number, code?: string) {
     super(message);
     this.name = "ApiError";
     this.statusCode = statusCode;
     this.retryAfter = retryAfter;
+    this.code = code;
   }
 }
 
@@ -118,10 +139,19 @@ async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
       const errorBody = await response.text();
       const retryHeader = response.headers.get("Retry-After");
       const retryAfter = retryHeader ? parseInt(retryHeader, 10) : undefined;
+      let code: string | undefined;
+      try {
+        const parsed = JSON.parse(errorBody);
+        if (typeof parsed?.code === "string" && parsed.code in MESSAGES) code = parsed.code;
+      } catch {
+        // not JSON
+      }
+      // Same wording as the client-side rules, whatever the server sent.
       throw new ApiError(
         response.status,
-        `API error (${response.status}): ${errorBody}`,
+        code ? MESSAGES[code] : `API error (${response.status}): ${errorBody}`,
         retryAfter,
+        code,
       );
     }
 
